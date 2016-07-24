@@ -1,0 +1,3 @@
+
+telegram.client:
+  token: {set your client id here}
