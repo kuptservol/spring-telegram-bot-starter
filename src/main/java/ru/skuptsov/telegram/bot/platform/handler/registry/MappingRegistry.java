@@ -70,12 +70,6 @@ public class MappingRegistry implements ApplicationContextAware {
             );
         }
 
-        if (messageMapping.callback().length != 0) {
-            foundResolver = true;
-            callbackQueryDataMessageHandlerResolver.add(
-                    new CallbackQueryDataMessageProxy(handlerMethod, copyOf(messageMapping.callback())));
-        }
-
         if (messageMapping.text().length != 0) {
             foundResolver = true;
             messageTextMessageHandlerResolver.add(
@@ -83,12 +77,11 @@ public class MappingRegistry implements ApplicationContextAware {
             );
         }
 
-        //todo: message filter
-//        if(!isEmpty(messageMapping.filter()){
-//            conditionEventMessageHandlerResolver.add(
-//                    new ConditionalEventMessageHandlerProxy()
-//            );
-//        }
+        if (messageMapping.callback().length != 0) {
+            foundResolver = true;
+            callbackQueryDataMessageHandlerResolver.add(
+                    new CallbackQueryDataMessageProxy(handlerMethod, copyOf(messageMapping.callback())));
+        }
 
         checkArgument(foundResolver, "No message mapping information found in handler[" + handlerMethod + "]");
     }

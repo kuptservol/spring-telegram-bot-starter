@@ -35,27 +35,6 @@ public class MessageHandlerBeanPostProcessor implements InitializingBean, Ordere
     @Autowired
     private MappingRegistry mappingRegistry;
 
-//    @Override
-//    public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
-//        if (findAnnotation(bean.getClass(), MessageHandler.class) != null) {
-//            boolean messageMappingAnnotationFound = false;
-//            for (Method method : bean.getClass().getMethods()) {
-//                MessageMapping messageMapping;
-//                if ((messageMapping = findAnnotation(method, MessageMapping.class)) != null) {
-//                    messageMappingAnnotationFound = true;
-//                    if (messageMapping.regexp() != null) {
-//
-//                    }
-//                }
-//            }
-//            if (!messageMappingAnnotationFound) {
-//                log.error("Found class [{}] annotated as MessageHandler with no MessageMapping method", bean.getClass());
-//            }
-//        }
-//
-//        return super.postProcessAfterInitialization(bean, beanName);
-//    }
-
     @Override
     public int getOrder() {
         return HIGHEST_PRECEDENCE;

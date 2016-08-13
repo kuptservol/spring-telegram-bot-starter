@@ -4,15 +4,14 @@ import com.codahale.metrics.annotation.Timed;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.telegram.telegrambots.api.methods.send.SendMessage;
-import org.telegram.telegrambots.api.methods.updatingmessages.EditMessageReplyMarkup;
-import org.telegram.telegrambots.api.methods.updatingmessages.EditMessageText;
+import org.telegram.telegrambots.api.methods.BotApiMethod;
 import org.telegram.telegrambots.api.objects.Message;
 import org.telegram.telegrambots.api.objects.Update;
 import ru.skuptsov.telegram.bot.platform.client.NextOffsetStrategy;
 import ru.skuptsov.telegram.bot.platform.client.TelegramBotApi;
 import ru.skuptsov.telegram.bot.platform.client.TelegramBotHttpClient;
 
+import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
@@ -60,27 +59,11 @@ public class TelegramBotApiImpl implements TelegramBotApi {
     }
 
     @Override
-    public Future<Message> sendMessage(SendMessage sendMessage) {
+    public <T extends BotApiMethod<Message>> Future<Message> executeMessageCommand(@NotNull T command) {
         return client.executePost(
-                sendMessage.getPath(),
-                sendMessage,
-                simpleTypeOf(Message.class));
+                command.getPath(),
+                command,
+                simpleTypeOf(Message.class)
+        );
     }
-
-    @Override
-    public Future<Message> editMessageReplyMarkup(EditMessageReplyMarkup editMessageReplyMarkup) {
-        return client.executePost(
-                editMessageReplyMarkup.getPath(),
-                editMessageReplyMarkup,
-                simpleTypeOf(Message.class));
-    }
-
-    @Override
-    public Future<Message> editMessageText(EditMessageText editMessageText) {
-        return client.executePost(
-                editMessageText.getPath(),
-                editMessageText,
-                simpleTypeOf(Message.class));
-    }
-
 }

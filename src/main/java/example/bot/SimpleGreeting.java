@@ -8,6 +8,8 @@ import ru.skuptsov.telegram.bot.platform.model.UpdateEvent;
 
 import java.util.function.Consumer;
 
+import static ru.skuptsov.telegram.bot.platform.client.command.MessageResponse.sendMessage;
+
 /**
  * @author Sergey Kuptsov
  * @since 04/07/2016
@@ -17,13 +19,12 @@ public class SimpleGreeting {
 
     @MessageMapping(text = "Привет")
     public MessageResponse sayHi(UpdateEvent updateEvent) {
-        return MessageResponse
-                .text("Привет!", updateEvent)
+        return sendMessage("Привет!", updateEvent)
                 .setCallback((Consumer<Message>) message -> System.out.println("Message sent"));
     }
 
     @MessageMapping(regexp = "(.*пока.*|.*до свиданья.*)")
     public MessageResponse sayGoodbye(UpdateEvent updateEvent) {
-        return MessageResponse.text("До новых встреч", updateEvent);
+        return sendMessage("До новых встреч", updateEvent);
     }
 }

@@ -20,5 +20,8 @@ public @interface MessageMapping {
     String[] callback() default {};
 
     //todo: message filter
+//    String callbackMethod() default "";
+
+    //todo: message filter
 //    String filter default "";
 }

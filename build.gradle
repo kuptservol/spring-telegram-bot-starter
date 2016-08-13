@@ -12,7 +12,10 @@ buildscript {
         metricsVersion = '3.1.2'
         aspectjVersion = '1.8.7'
         ningVersion = '1.9.30'
+        telegramApiVersion = 'v2.3.4'
     }
+
+    //todo : goto jitpack
 
     dependencies {
         classpath "org.springframework.boot:spring-boot-gradle-plugin:$bootVersion"
@@ -74,7 +77,7 @@ dependencies {
     compile "com.ryantenney.metrics:metrics-spring:$metricsVersion"
     compile "org.aspectj:aspectjrt:$aspectjVersion"
     compile "org.aspectj:aspectjweaver:$aspectjVersion"
-    compile 'com.github.rubenlagus:TelegramBots:v2.3.3.2'
+    compile 'com.github.rubenlagus:TelegramBots:v2.3.4'
     compile "com.ning:async-http-client:$ningVersion"
 }
 
