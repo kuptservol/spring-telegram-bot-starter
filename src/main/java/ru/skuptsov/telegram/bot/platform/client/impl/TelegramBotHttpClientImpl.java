@@ -15,6 +15,7 @@ import ru.skuptsov.telegram.bot.platform.client.exception.TelegramBotApiExceptio
 import ru.skuptsov.telegram.bot.platform.model.ExecutionResult;
 
 import javax.annotation.Nullable;
+import javax.annotation.PreDestroy;
 import javax.validation.constraints.NotNull;
 import java.io.IOException;
 import java.util.Map;
@@ -166,5 +167,10 @@ public class TelegramBotHttpClientImpl implements TelegramBotHttpClient {
             throw new TelegramBotApiException("Error while requesting url: " + httpResponse.getUri() +
                     " response code: " + httpResponse.getStatusCode() + " reason: " + httpResponse.getStatusText());
         }
+    }
+
+    @PreDestroy
+    public void destroy(){
+        httpClient.close();
     }
 }

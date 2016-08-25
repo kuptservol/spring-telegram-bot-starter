@@ -1,10 +1,13 @@
 package ru.skuptsov.telegram.bot.platform.client.command;
 
+import org.telegram.telegrambots.api.methods.AnswerCallbackQuery;
+import org.telegram.telegrambots.api.methods.AnswerInlineQuery;
 import org.telegram.telegrambots.api.methods.ForwardMessage;
 import org.telegram.telegrambots.api.methods.send.SendContact;
 import org.telegram.telegrambots.api.methods.send.SendLocation;
 import org.telegram.telegrambots.api.methods.send.SendMessage;
 import org.telegram.telegrambots.api.methods.send.SendVenue;
+import org.telegram.telegrambots.api.methods.updatingmessages.EditMessageCaption;
 import org.telegram.telegrambots.api.methods.updatingmessages.EditMessageReplyMarkup;
 import org.telegram.telegrambots.api.methods.updatingmessages.EditMessageText;
 import ru.skuptsov.telegram.bot.platform.client.command.impl.*;
@@ -68,8 +71,20 @@ public class MessageResponse {
         return fromCommand(new SendLocationCommand(message));
     }
 
+    public static MessageResponse answerCallbackQuery(@NotNull AnswerCallbackQuery message) {
+        return fromCommand(new AnswerCallbackQueryCommand(null, message));
+    }
+
+    public static MessageResponse answerInlineQuery(@NotNull AnswerInlineQuery message) {
+        return fromCommand(new AnswerInlineQueryCommand(null, message));
+    }
+
     public static MessageResponse sendVenue(@NotNull SendVenue message) {
         return fromCommand(new SendVenueCommand(message));
+    }
+
+    public static MessageResponse editMessageCaption(@NotNull EditMessageCaption message) {
+        return fromCommand(new EditMessageCaptionCommand(message));
     }
 
     public static MessageResponse forwardMessage(@NotNull ForwardMessage message) {

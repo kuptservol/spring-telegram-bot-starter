@@ -6,8 +6,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.jmx.export.naming.IdentityNamingStrategy;
-import org.springframework.stereotype.Component;
-import org.telegram.telegrambots.api.objects.Update;
 import ru.skuptsov.telegram.bot.platform.client.NextOffsetStrategy;
 import ru.skuptsov.telegram.bot.platform.config.NextOffSetStrategyConfiguration;
 
@@ -18,7 +16,6 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.RandomAccessFile;
-import java.util.List;
 import java.util.Scanner;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -32,16 +29,17 @@ import static java.util.concurrent.TimeUnit.SECONDS;
  * @author Sergey Kuptsov
  * @since 22/05/2016
  */
-@Component
-//todo: Make this bean to override with ConditionalBean - move it to config
 public class InMemoryNextOffsetStrategyImpl implements NextOffsetStrategy {
     private final Logger log = LoggerFactory.getLogger(IdentityNamingStrategy.class);
+
     private final AtomicInteger counter = new AtomicInteger(0);
+
     private final ScheduledExecutorService persistCounterService = newScheduledThreadPool(1,
             new ThreadFactoryBuilder()
                     .setNameFormat("PersistCounterThread-%d")
                     .setDaemon(true)
                     .build());
+
     private RandomAccessFile writer;
 
     private SyncMode syncMode;
@@ -58,8 +56,8 @@ public class InMemoryNextOffsetStrategyImpl implements NextOffsetStrategy {
     }
 
     @Override
-    public void saveCurrentOffset(@NotNull List<Update> updates) {
-        updates.stream().map(Update::getUpdateId).max(Integer::compareTo).ifPresent(value -> counter.set(value + 1));
+    public void saveLastOffset(@NotNull Integer lasOffset) {
+        counter.set(lasOffset + 1);
         if (syncMode == SyncMode.SYNC) {
             writeCurrentOffsetValue();
         }
