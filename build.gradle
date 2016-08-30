@@ -15,8 +15,6 @@ buildscript {
         telegramApiVersion = 'v2.3.4'
     }
 
-    //todo : goto jitpack
-
     dependencies {
         classpath "org.springframework.boot:spring-boot-gradle-plugin:$bootVersion"
     }
@@ -30,9 +28,9 @@ buildscript {
 
 install {
     repositories.mavenInstaller {
-        pom.version = '0.1'
-        pom.groupId = 'ru.skuptsov.telegram.bot'
-        pom.artifactId = 'telegram-spring-reactive-bot-platform'
+        pom.version = 'v0.1'
+        pom.groupId = 'com.github.kuptservol'
+        pom.artifactId = 'spring-telegram-bot-starter'
     }
 }
 
@@ -79,6 +77,7 @@ dependencies {
     compile "org.aspectj:aspectjweaver:$aspectjVersion"
     compile 'com.github.rubenlagus:TelegramBots:v2.3.4'
     compile "com.ning:async-http-client:$ningVersion"
+    compile 'com.github.jitpack:gradle-simple:1.0.5'
 }
 
 sourceCompatibility = 1.8

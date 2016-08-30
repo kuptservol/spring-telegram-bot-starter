@@ -10,7 +10,6 @@ import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
 /**
@@ -25,7 +24,7 @@ public interface TelegramBotApi {
 
     <T extends BotApiMethod<Message>> Optional<Message> sendMessageSync(@NotNull T message);
 
-    Optional<User> getMe() throws ExecutionException, InterruptedException;
+    Optional<User> getMe();
 
     Optional<File> getFile(@NotNull String file_id);
 

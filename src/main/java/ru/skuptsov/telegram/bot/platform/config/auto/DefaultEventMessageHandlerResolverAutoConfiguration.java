@@ -1,4 +1,4 @@
-package ru.skuptsov.telegram.bot.platform.handler.resolver;
+package ru.skuptsov.telegram.bot.platform.config.auto;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

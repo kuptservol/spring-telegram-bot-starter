@@ -8,7 +8,11 @@ import ru.skuptsov.telegram.bot.platform.worker.saver.UpdatesSaver;
 
 import javax.validation.constraints.NotNull;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.concurrent.BlockingQueue;
+
+import static java.util.Optional.empty;
+import static java.util.Optional.of;
 
 /**
  * @author Sergey Kuptsov
@@ -35,6 +39,17 @@ public class BlockingUpdatesSaver implements UpdatesSaver {
                         log.error("Couldn't save update events", e);
                     }
                 });
+    }
+
+    @Override
+    public Optional<UpdateEvent> next() {
+        try {
+            return of(updatesQueue.take());
+        } catch (InterruptedException e) {
+            log.debug("Can't take message from queue", e);
+        }
+
+        return empty();
     }
 }
 

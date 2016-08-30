@@ -3,7 +3,6 @@ package ru.skuptsov.telegram.bot.platform.model;
 import lombok.*;
 import org.joda.time.DateTime;
 import org.telegram.telegrambots.api.objects.Update;
-import ru.skuptsov.telegram.bot.platform.handler.MessageHandler;
 
 /**
  * @author Sergey Kuptsov
@@ -17,7 +16,12 @@ import ru.skuptsov.telegram.bot.platform.handler.MessageHandler;
 public class UpdateEvent {
     public final static UpdateEvent EMPTY = new UpdateEvent();
 
+    /**
+     * Original update receive from telegram
+     */
     private Update update;
-    private MessageHandler messageHandler;
+    /**
+     * Received time
+     */
     private DateTime received;
 }

@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 import ru.skuptsov.telegram.bot.platform.client.TelegramBotApi;
 import ru.skuptsov.telegram.bot.platform.client.impl.TelegramBotApiImpl;
 
@@ -43,6 +44,7 @@ public class ApiCommandSenderConfiguration {
     private TelegramBotClientConfiguration telegramBotClientConfiguration;
 
     @Bean(name = "commandSenderBotApi")
+    @Primary
     public TelegramBotApi telegramBotApi() {
         return new TelegramBotApiImpl(telegramBotClientConfiguration.createTelegramBotClient(getClient()));
     }

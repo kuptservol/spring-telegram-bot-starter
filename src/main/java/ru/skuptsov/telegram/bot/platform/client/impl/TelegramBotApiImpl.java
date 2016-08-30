@@ -199,7 +199,7 @@ public class TelegramBotApiImpl implements TelegramBotApi {
         Future<Integer> getChatMembersFuture = client.executeGet(
                 GetChatMemberCount.PATH,
                 of(CHATID_FIELD, chatId),
-                simpleTypeOf(Boolean.class)
+                simpleTypeOf(Integer.class)
         );
 
         return executeSync(getChatMembersFuture, GetChatMemberCount.PATH);

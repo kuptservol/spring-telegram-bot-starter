@@ -12,6 +12,7 @@ import org.telegram.telegrambots.api.methods.updatingmessages.EditMessageReplyMa
 import org.telegram.telegrambots.api.methods.updatingmessages.EditMessageText;
 import ru.skuptsov.telegram.bot.platform.client.command.impl.*;
 import ru.skuptsov.telegram.bot.platform.model.UpdateEvent;
+import ru.skuptsov.telegram.bot.platform.model.api.methods.send.*;
 
 import javax.validation.constraints.NotNull;
 import java.util.function.Consumer;
@@ -19,6 +20,8 @@ import java.util.function.Consumer;
 /**
  * @author Sergey Kuptsov
  * @since 24/07/2016
+ *
+ * Message response to answer on chat activity
  */
 public class MessageResponse {
     public final static MessageResponse EMPTY = new MessageResponse(ApiCommand.EMPTY);
@@ -69,6 +72,30 @@ public class MessageResponse {
 
     public static MessageResponse sendLocation(@NotNull SendLocation message) {
         return fromCommand(new SendLocationCommand(message));
+    }
+
+    public static MessageResponse sendDocument(@NotNull SendDocument message) {
+        return fromCommand(new SendDocumentCommand(message));
+    }
+
+    public static MessageResponse sendPhoto(@NotNull SendPhoto message) {
+        return fromCommand(new SendPhotoCommand(message));
+    }
+
+    public static MessageResponse sendSticker(@NotNull SendSticker message) {
+        return fromCommand(new SendStickerCommand(message));
+    }
+
+    public static MessageResponse sendVideo(@NotNull SendVideo message) {
+        return fromCommand(new SendVideoCommand(message));
+    }
+
+    public static MessageResponse sendVoice(@NotNull SendVoice message) {
+        return fromCommand(new SendVoiceCommand(message));
+    }
+
+    public static MessageResponse sendAudio(@NotNull SendAudio message) {
+        return fromCommand(new SendAudioCommand(message));
     }
 
     public static MessageResponse answerCallbackQuery(@NotNull AnswerCallbackQuery message) {

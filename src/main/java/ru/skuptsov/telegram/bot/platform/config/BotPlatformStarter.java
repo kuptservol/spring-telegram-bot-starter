@@ -17,7 +17,6 @@ import static org.springframework.boot.SpringApplication.run;
  * @author Sergey Kuptsov
  * @since 04/07/2016
  */
-//todo: add different logo with start
 public class BotPlatformStarter {
     private static final Logger log = LoggerFactory.getLogger(BotPlatformStarter.class);
     private static final Object BOT_PLATFORM_CONFIGURATION_CLASS = BotPlatformConfiguration.class;

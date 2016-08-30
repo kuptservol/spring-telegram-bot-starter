@@ -4,7 +4,6 @@ import com.codahale.metrics.annotation.Timed;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Repository;
 import ru.skuptsov.telegram.bot.platform.config.UpdatesWorkerRepositoryConfiguration;
 import ru.skuptsov.telegram.bot.platform.model.UpdateEvent;
 import ru.skuptsov.telegram.bot.platform.model.UpdateEvents;
@@ -22,9 +21,8 @@ import static ru.skuptsov.telegram.bot.platform.model.UpdateEvent.EMPTY;
  * @author Sergey Kuptsov
  * @since 30/05/2016
  */
-@Repository
-public class InMemoryBlockingUpdatesWorkerRepository implements UpdatesWorkerRepository {
-    private final Logger log = LoggerFactory.getLogger(InMemoryBlockingUpdatesWorkerRepository.class);
+public class BlockingQueueUpdatesWorkerRepository implements UpdatesWorkerRepository {
+    private final Logger log = LoggerFactory.getLogger(BlockingQueueUpdatesWorkerRepository.class);
 
     @Autowired
     private UpdatesWorkerRepositoryConfiguration updatesWorkerRepositoryConfiguration;
@@ -42,13 +40,7 @@ public class InMemoryBlockingUpdatesWorkerRepository implements UpdatesWorkerRep
     @Override
     @Timed(name = "updates.worker.repository.get")
     public UpdateEvent get() {
-        UpdateEvent updateEvent;
-        try {
-            updateEvent = updatesQueue.take();
-        } catch (InterruptedException e) {
-            log.debug("Can't take message from queue", e);
-            updateEvent = EMPTY;
-        }
+        UpdateEvent updateEvent = updatesSaver.next().orElse(EMPTY);
 
         log.trace("Returned event {}", updateEvent);
         return updateEvent;
