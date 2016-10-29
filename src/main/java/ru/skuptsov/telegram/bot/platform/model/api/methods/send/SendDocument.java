@@ -8,6 +8,7 @@ import org.telegram.telegrambots.Constants;
 import org.telegram.telegrambots.api.methods.BotApiMethod;
 import org.telegram.telegrambots.api.objects.Message;
 import org.telegram.telegrambots.api.objects.replykeyboard.ReplyKeyboard;
+import org.telegram.telegrambots.exceptions.TelegramApiValidationException;
 
 import java.io.File;
 import java.io.IOException;
@@ -272,5 +273,12 @@ public class SendDocument extends BotApiMethod<Message> {
         }
 
         return jsonObject;
+    }
+
+    @Override
+    public void validate() throws TelegramApiValidationException {
+        if (chatId == null) {
+            throw new TelegramApiValidationException("ChatId can't be null", this);
+        }
     }
 }
