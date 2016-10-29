@@ -6,13 +6,13 @@ buildscript {
     ext {
         projectVersion = '0.1'
 
-        bootVersion = '1.3.1.RELEASE'
-        jacksonVersion = '2.5.3'
+        bootVersion = '1.4.1.RELEASE'
+        jacksonVersion = '2.8.4'
         testngVersion = '6.9.9'
         metricsVersion = '3.1.2'
         aspectjVersion = '1.8.7'
         ningVersion = '1.9.30'
-        telegramApiVersion = 'v2.3.4'
+        telegramApiVersion = 'v2.4.0'
     }
 
     dependencies {
@@ -75,7 +75,7 @@ dependencies {
     compile "com.ryantenney.metrics:metrics-spring:$metricsVersion"
     compile "org.aspectj:aspectjrt:$aspectjVersion"
     compile "org.aspectj:aspectjweaver:$aspectjVersion"
-    compile 'com.github.rubenlagus:TelegramBots:v2.3.4'
+    compile "com.github.rubenlagus:TelegramBots:$telegramApiVersion"
     compile "com.ning:async-http-client:$ningVersion"
     compile 'com.github.jitpack:gradle-simple:1.0.5'
 }

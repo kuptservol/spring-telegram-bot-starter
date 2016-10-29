@@ -22,7 +22,6 @@ import static com.google.common.collect.ImmutableMap.of;
 import static java.util.Comparator.comparingInt;
 import static java.util.Optional.empty;
 import static java.util.Optional.of;
-import static org.telegram.telegrambots.api.methods.GetFile.FILEID_FIELD;
 import static org.telegram.telegrambots.api.methods.send.SendSticker.CHATID_FIELD;
 import static ru.skuptsov.telegram.bot.platform.client.utils.JavaTypeUtils.listTypeOf;
 import static ru.skuptsov.telegram.bot.platform.client.utils.JavaTypeUtils.simpleTypeOf;
@@ -32,6 +31,7 @@ import static ru.skuptsov.telegram.bot.platform.client.utils.JavaTypeUtils.simpl
  * @since 22/05/2016
  */
 public class TelegramBotApiImpl implements TelegramBotApi {
+    private static final String FILEID_FIELD = "file_id";
     private final Logger log = LoggerFactory.getLogger(TelegramBotApiImpl.class);
     private final TelegramBotHttpClient client;
     @Autowired
