@@ -4,7 +4,7 @@ apply plugin: 'maven'
 
 buildscript {
     ext {
-        projectVersion = '0.1'
+        projectVersion = 'v1.0-SNAPSHOT'
 
         bootVersion = '1.4.1.RELEASE'
         jacksonVersion = '2.8.4'
@@ -29,7 +29,7 @@ buildscript {
 
 install {
     repositories.mavenInstaller {
-        pom.version = 'v0.1'
+        pom.version = "$projectVersion"
         pom.groupId = 'com.github.kuptservol'
         pom.artifactId = 'spring-telegram-bot-starter'
     }
