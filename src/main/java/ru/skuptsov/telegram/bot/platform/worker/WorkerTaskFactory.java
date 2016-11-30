@@ -9,6 +9,7 @@ import ru.skuptsov.telegram.bot.platform.client.command.ApiCommand;
 import ru.skuptsov.telegram.bot.platform.handler.MessageHandler;
 import ru.skuptsov.telegram.bot.platform.handler.resolver.EventMessageHandlerResolver;
 import ru.skuptsov.telegram.bot.platform.model.UpdateEvent;
+import ru.skuptsov.telegram.bot.platform.service.MetricsService;
 
 /**
  * @author Sergey Kuptsov
@@ -21,11 +22,14 @@ public class WorkerTaskFactory {
     @Autowired
     private EventMessageHandlerResolver eventProcessorResolver;
 
-    public WorkerTask create(UpdateEvent updateEvent) {
+    @Autowired
+    private MetricsService metricsService;
+
+    public WorkerTask createFor(UpdateEvent updateEvent) {
         return new WorkerTask(updateEvent, eventProcessorResolver);
     }
 
-    public static final class WorkerTask {
+    public final class WorkerTask {
         private final Logger log = LoggerFactory.getLogger(WorkerTask.class);
 
         private final UpdateEvent updateEvent;
@@ -53,11 +57,11 @@ public class WorkerTaskFactory {
                 MessageHandler messageHandler = eventProcessorResolver.resolve(updateEvent);
                 return messageHandler.handle(updateEvent).getApiCommand();
             } catch (Exception ex) {
-                log.error("Error ocurred while processing event {}", updateEvent, ex);
+                metricsService.onMessageProcessingError();
+                log.error("Platform error occurred while processing event {}", updateEvent, ex);
             }
 
             return ApiCommand.EMPTY;
-
         }
     }
 }

@@ -12,6 +12,7 @@ import ru.skuptsov.telegram.bot.platform.client.TelegramBotApi;
 import ru.skuptsov.telegram.bot.platform.config.UpdatesRepositoryConfiguration;
 import ru.skuptsov.telegram.bot.platform.model.UpdateEvent;
 import ru.skuptsov.telegram.bot.platform.model.UpdateEvents;
+import ru.skuptsov.telegram.bot.platform.service.MetricsService;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -37,6 +38,9 @@ public class UpdatesRepository extends AbstractExecutionThreadService {
     private TelegramBotApi botApi;
 
     @Autowired
+    private MetricsService metricsService;
+
+    @Autowired
     private EventBus eventBus;
 
     @Override
@@ -50,6 +54,8 @@ public class UpdatesRepository extends AbstractExecutionThreadService {
             logger.debug("Received following updates: {}", updates);
 
             eventBus.post(createUpdateEvents(updates));
+
+            metricsService.onMessagesReceived(updates.size());
         }
     }
 

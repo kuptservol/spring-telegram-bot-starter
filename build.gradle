@@ -37,6 +37,7 @@ install {
 
 repositories {
     maven { url "https://jitpack.io" }
+    mavenLocal()
     mavenCentral()
 }
 

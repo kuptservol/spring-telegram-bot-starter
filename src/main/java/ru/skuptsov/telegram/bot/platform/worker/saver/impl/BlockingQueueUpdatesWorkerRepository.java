@@ -32,13 +32,13 @@ public class BlockingQueueUpdatesWorkerRepository implements UpdatesWorkerReposi
     private UpdatesSaver updatesSaver;
 
     @Override
-    @Timed(name = "updates.worker.repository.save")
+    @Timed(name = "bot.updates.worker.repository.save", absolute = true)
     public void save(@NotNull UpdateEvents updateEvents) {
         updatesSaver.save(updateEvents);
     }
 
     @Override
-    @Timed(name = "updates.worker.repository.get")
+    @Timed(name = "bot.updates.worker.repository.get", absolute = true)
     public UpdateEvent get() {
         UpdateEvent updateEvent = updatesSaver.next().orElse(EMPTY);
 
@@ -49,10 +49,6 @@ public class BlockingQueueUpdatesWorkerRepository implements UpdatesWorkerReposi
     @PostConstruct
     public void init() {
         updatesQueue = new ArrayBlockingQueue<>(updatesWorkerRepositoryConfiguration.getQueueSize());
-        if (updatesWorkerRepositoryConfiguration.getBlock()) {
-            updatesSaver = new BlockingUpdatesSaver(updatesQueue);
-        } else {
-            updatesSaver = new NonBlockingUpdatesSaver(updatesQueue);
-        }
+        updatesSaver = new BlockingUpdatesSaver(updatesQueue);
     }
 }

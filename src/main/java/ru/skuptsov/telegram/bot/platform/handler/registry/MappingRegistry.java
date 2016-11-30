@@ -19,6 +19,7 @@ import ru.skuptsov.telegram.bot.platform.handler.resolver.ConditionEventMessageH
 import ru.skuptsov.telegram.bot.platform.handler.resolver.MessageTextMessageHandlerResolver;
 import ru.skuptsov.telegram.bot.platform.handler.resolver.RegexpMessageTextHandlerResolver;
 import ru.skuptsov.telegram.bot.platform.model.UpdateEvent;
+import ru.skuptsov.telegram.bot.platform.service.MetricsService;
 
 import java.lang.reflect.Method;
 
@@ -47,6 +48,9 @@ public class MappingRegistry implements ApplicationContextAware {
     @Autowired
     private RegexpMessageTextHandlerResolver regexpMessageTextHandlerResolver;
 
+    @Autowired
+    private MetricsService metricsService;
+
     private ApplicationContext applicationContext;
 
     //todo: add injecting api command sender
@@ -65,25 +69,43 @@ public class MappingRegistry implements ApplicationContextAware {
         boolean foundResolver = false;
         if (!isEmpty(messageMapping.regexp())) {
             foundResolver = true;
-            regexpMessageTextHandlerResolver.add(
-                    new RegexpMessageTextHandlerProxy(handlerMethod, messageMapping.regexp())
-            );
+            registerNewRegexpMessageTextHandler(handlerMethod, messageMapping);
         }
 
         if (messageMapping.text().length != 0) {
             foundResolver = true;
-            messageTextMessageHandlerResolver.add(
-                    new MessageTextMessageHandlerProxy(handlerMethod, copyOf(messageMapping.text()))
-            );
+            registerNewMessageTextMessageHandler(handlerMethod, messageMapping);
         }
 
         if (messageMapping.callback().length != 0) {
             foundResolver = true;
-            callbackQueryDataMessageHandlerResolver.add(
-                    new CallbackQueryDataMessageProxy(handlerMethod, copyOf(messageMapping.callback())));
+            registerNewCallbackQueryDataHandler(handlerMethod, messageMapping);
         }
 
         checkArgument(foundResolver, "No message mapping information found in handler[" + handlerMethod + "]");
+    }
+
+    private void registerNewCallbackQueryDataHandler(HandlerMethod handlerMethod, MessageMapping messageMapping) {
+        metricsService.registerMessageProcessingMethod(handlerMethod);
+        callbackQueryDataMessageHandlerResolver.add(
+                applicationContext.getBean(CallbackQueryDataMessageProxy.class,
+                        handlerMethod, copyOf(messageMapping.callback())));
+    }
+
+    private void registerNewMessageTextMessageHandler(HandlerMethod handlerMethod, MessageMapping messageMapping) {
+        metricsService.registerMessageProcessingMethod(handlerMethod);
+        messageTextMessageHandlerResolver.add(
+                applicationContext.getBean(MessageTextMessageHandlerProxy.class,
+                        handlerMethod, copyOf(messageMapping.text()))
+        );
+    }
+
+    private void registerNewRegexpMessageTextHandler(HandlerMethod handlerMethod, MessageMapping messageMapping) {
+        metricsService.registerMessageProcessingMethod(handlerMethod);
+        regexpMessageTextHandlerResolver.add(
+                applicationContext.getBean(RegexpMessageTextHandlerProxy.class,
+                        handlerMethod, messageMapping.regexp())
+        );
     }
 
     private void checkParameters(HandlerMethod handlerMethod) {

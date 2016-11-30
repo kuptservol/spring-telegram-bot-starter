@@ -1,7 +1,5 @@
 package ru.skuptsov.telegram.bot.platform.handler.resolver;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import ru.skuptsov.telegram.bot.platform.handler.MessageTextMessageHandler;
@@ -18,7 +16,6 @@ import static ru.skuptsov.telegram.bot.platform.handler.UpdateFunctions.MESSAGE_
  */
 @Component
 public class MessageTextMessageHandlerResolver extends AbstractMessageContentMessageHandlerResolver {
-    private final Logger log = LoggerFactory.getLogger(MessageTextMessageHandlerResolver.class);
 
     @Autowired(required = false)
     public MessageTextMessageHandlerResolver(List<MessageTextMessageHandler> messageTextEventProcessors) {

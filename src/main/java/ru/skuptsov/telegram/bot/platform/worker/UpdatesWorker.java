@@ -24,6 +24,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 import static com.google.common.util.concurrent.MoreExecutors.shutdownAndAwaitTermination;
+import static ru.skuptsov.telegram.bot.platform.model.UpdateEvent.EMPTY;
 
 /**
  * @author Sergey Kuptsov
@@ -63,12 +64,14 @@ public class UpdatesWorker extends AbstractExecutionThreadService {
     protected void run() throws Exception {
         while (isRunning()) {
             UpdateEvent updateEvent = updatesWorkerRepository.get();
-            CompletableFuture.supplyAsync(
-                    () -> workerTaskFactory.create(updateEvent).execute(),
-                    updatesWorkerExecutor)
-                    .thenAcceptAsync(
-                            apiCommand -> apiCommandSender.sendCommand(apiCommand),
-                            apiCommandSenderExecutor);
+            if (updateEvent != EMPTY) {
+                CompletableFuture.supplyAsync(
+                        () -> workerTaskFactory.createFor(updateEvent).execute(),
+                        updatesWorkerExecutor)
+                        .thenAcceptAsync(
+                                apiCommand -> apiCommandSender.sendCommand(apiCommand),
+                                apiCommandSenderExecutor);
+            }
         }
     }
 

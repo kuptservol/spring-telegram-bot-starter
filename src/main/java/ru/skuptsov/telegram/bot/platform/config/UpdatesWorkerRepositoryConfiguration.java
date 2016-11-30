@@ -14,7 +14,4 @@ public class UpdatesWorkerRepositoryConfiguration {
 
     @Value("${updates.worker.repository.queue.size:2048}")
     private Integer queueSize;
-
-    @Value("${updates.worker.repository.queue.block:true}")
-    private Boolean block;
 }

@@ -1,6 +1,5 @@
 package ru.skuptsov.telegram.bot.platform.client.impl;
 
-import com.codahale.metrics.annotation.Timed;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,7 +32,9 @@ import static ru.skuptsov.telegram.bot.platform.client.utils.JavaTypeUtils.simpl
 public class TelegramBotApiImpl implements TelegramBotApi {
     private static final String FILEID_FIELD = "file_id";
     private final Logger log = LoggerFactory.getLogger(TelegramBotApiImpl.class);
+
     private final TelegramBotHttpClient client;
+
     @Autowired
     private NextOffsetStrategy nextOffsetStrategy;
 
@@ -42,7 +43,6 @@ public class TelegramBotApiImpl implements TelegramBotApi {
     }
 
     @Override
-    @Timed(name = "bot.api.client.getNextUpdates", absolute = true)
     public List<Update> getNextUpdates(Integer poolingLimit, Integer poolingTimeout) {
         List<Update> updates = new ArrayList<>();
 

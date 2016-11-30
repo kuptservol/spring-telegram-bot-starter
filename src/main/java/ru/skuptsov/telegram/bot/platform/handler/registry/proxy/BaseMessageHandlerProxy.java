@@ -2,6 +2,7 @@ package ru.skuptsov.telegram.bot.platform.handler.registry.proxy;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.ReflectionUtils;
 import ru.skuptsov.telegram.bot.platform.client.command.MessageResponse;
 import ru.skuptsov.telegram.bot.platform.client.exception.HandlerMethodInvocationException;
@@ -9,6 +10,7 @@ import ru.skuptsov.telegram.bot.platform.client.exception.TelegramBotApiExceptio
 import ru.skuptsov.telegram.bot.platform.handler.MessageHandler;
 import ru.skuptsov.telegram.bot.platform.handler.registry.MessageHandlerBeanPostProcessor;
 import ru.skuptsov.telegram.bot.platform.model.UpdateEvent;
+import ru.skuptsov.telegram.bot.platform.service.MetricsService;
 
 import java.lang.reflect.Method;
 
@@ -20,6 +22,9 @@ public abstract class BaseMessageHandlerProxy implements MessageHandler {
     private static final Logger log = LoggerFactory.getLogger(MessageHandlerBeanPostProcessor.class);
 
     private final HandlerMethod handlerMethod;
+
+    @Autowired
+    private MetricsService metricsService;
 
     public BaseMessageHandlerProxy(HandlerMethod handlerMethod) {
         this.handlerMethod = handlerMethod;
@@ -33,10 +38,17 @@ public abstract class BaseMessageHandlerProxy implements MessageHandler {
         try {
             ReflectionUtils.makeAccessible(handlerMethodToInvoke);
             Object[] args = {updateEvent};
-            return (MessageResponse) handlerMethodToInvoke.invoke(handlerMethod.getBean(), args);
+
+            long start = System.currentTimeMillis();
+
+            MessageResponse messageResponse = (MessageResponse) handlerMethodToInvoke.invoke(handlerMethod.getBean(), args);
+
+            metricsService.onMessageProcessingComplete(handlerMethod, System.currentTimeMillis() - start);
+            return messageResponse;
         } catch (IllegalStateException ex) {
             throw new HandlerMethodInvocationException(handlerMethodToInvoke, ex);
         } catch (Exception ex) {
+            metricsService.onMessageProcessingError(handlerMethod);
             throw new TelegramBotApiException(ex);
         }
     }
