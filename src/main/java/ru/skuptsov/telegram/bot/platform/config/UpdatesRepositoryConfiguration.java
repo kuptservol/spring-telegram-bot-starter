@@ -39,6 +39,7 @@ public class UpdatesRepositoryConfiguration {
 
     @Value("${telegram.client.allowPoolingConnections:true}")
     private Boolean allowPoolingConnections;
+
     @Autowired
     private TelegramBotClientConfiguration telegramBotClientConfiguration;
 

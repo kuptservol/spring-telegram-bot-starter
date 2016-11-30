@@ -108,6 +108,10 @@ public class TelegramBotHttpClientImpl implements TelegramBotHttpClient {
 
         log.debug("Executing request : {}", httpRequest);
 
+        return call(httpRequest, returnType);
+    }
+
+    private <T> Future<T> call(Request httpRequest, JavaType returnType) {
         return httpClient.executeRequest(httpRequest, createCompletionHandler(returnType));
     }
 
@@ -170,7 +174,7 @@ public class TelegramBotHttpClientImpl implements TelegramBotHttpClient {
     }
 
     @PreDestroy
-    public void destroy(){
+    public void destroy() {
         httpClient.close();
     }
 }

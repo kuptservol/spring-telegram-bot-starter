@@ -59,14 +59,17 @@ public class ApiCommandSenderImpl extends AbstractExecutionThreadService impleme
 
     //todo: try to generify
     private void sendCommand() throws InterruptedException {
-        ApiCommand apiCommand = apiCommandQueue.take();
-        CompletableFuture<Future<?>> sendCommandFuture =
-                CompletableFuture.supplyAsync(() -> apiCommand.execute(telegramBotApi), apiCommandSenderExecutor);
+        ApiCommand apiCommand = apiCommandQueue.poll(100, TimeUnit.MILLISECONDS);
 
-        if (apiCommand.getCallback() != EMPTY_CALLBACK) {
-            sendCommandFuture.thenAcceptAsync(
-                    apiCommand::callback,
-                    apiCommandSenderCallbackExecutor);
+        if (apiCommand != null) {
+            CompletableFuture<Future<?>> sendCommandFuture =
+                    CompletableFuture.supplyAsync(() -> apiCommand.execute(telegramBotApi), apiCommandSenderExecutor);
+
+            if (apiCommand.getCallback() != EMPTY_CALLBACK) {
+                sendCommandFuture.thenAcceptAsync(
+                        apiCommand::callback,
+                        apiCommandSenderCallbackExecutor);
+            }
         }
     }
 

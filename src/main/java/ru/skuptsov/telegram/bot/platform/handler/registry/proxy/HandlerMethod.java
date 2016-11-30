@@ -36,7 +36,6 @@ public class HandlerMethod {
 
     private final HandlerMethod resolvedFromHandlerMethod;
 
-
     /**
      * Create an instance from a bean instance and a method.
      */
@@ -71,7 +70,7 @@ public class HandlerMethod {
     /**
      * Create an instance from a bean name, a method, and a {@code BeanFactory}.
      * The method {@link #createWithResolvedBean()} may be used later to
-     * re-create the {@code HandlerMethod} with an initialized bean.
+     * re-createFor the {@code HandlerMethod} with an initialized bean.
      */
     public HandlerMethod(String beanName, BeanFactory beanFactory, Method method) {
         Assert.hasText(beanName, "Bean name is required");
@@ -101,7 +100,7 @@ public class HandlerMethod {
     }
 
     /**
-     * Re-create HandlerMethod with the resolved handler.
+     * Re-createFor HandlerMethod with the resolved handler.
      */
     private HandlerMethod(HandlerMethod handlerMethod, Object handler) {
         Assert.notNull(handlerMethod, "HandlerMethod is required");
@@ -152,7 +151,7 @@ public class HandlerMethod {
      * If the bean method is a bridge method, this method returns the bridged
      * (user-defined) method. Otherwise it returns the same method as {@link #getMethod()}.
      */
-    protected Method getBridgedMethod() {
+    public Method getBridgedMethod() {
         return this.bridgedMethod;
     }
 

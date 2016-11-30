@@ -12,7 +12,8 @@ import java.util.Optional;
 import java.util.concurrent.BlockingQueue;
 
 import static java.util.Optional.empty;
-import static java.util.Optional.of;
+import static java.util.Optional.ofNullable;
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
 /**
  * @author Sergey Kuptsov
@@ -44,7 +45,8 @@ public class BlockingUpdatesSaver implements UpdatesSaver {
     @Override
     public Optional<UpdateEvent> next() {
         try {
-            return of(updatesQueue.take());
+            UpdateEvent poll = updatesQueue.poll(100, MILLISECONDS);
+            return ofNullable(poll);
         } catch (InterruptedException e) {
             log.debug("Can't take message from queue", e);
         }

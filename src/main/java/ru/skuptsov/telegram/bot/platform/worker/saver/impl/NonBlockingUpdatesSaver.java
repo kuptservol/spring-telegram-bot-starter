@@ -11,8 +11,8 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.BlockingQueue;
 
-import static java.util.Optional.empty;
-import static java.util.Optional.of;
+import static java.lang.Thread.sleep;
+import static java.util.Optional.ofNullable;
 
 /**
  * @author Sergey Kuptsov
@@ -43,13 +43,12 @@ public final class NonBlockingUpdatesSaver implements UpdatesSaver {
 
     @Override
     public Optional<UpdateEvent> next() {
-        Optional<UpdateEvent> updateEvent = of(updatesQueue.poll());
-        if (!updateEvent.isPresent()) {
+        Optional<UpdateEvent> updateEvent;
+        while (!(updateEvent = ofNullable(updatesQueue.poll())).isPresent()) {
             try {
-                wait(100);
+                sleep(100);
             } catch (InterruptedException e) {
-                log.error("Interrupted", e);
-                return empty();
+                log.error("Error", e);
             }
         }
 
