@@ -134,5 +134,16 @@ By default new unprocessed messages are stored locally in BlockingQueue and proc
 
 Configuration options can be found in ru.skuptsov.telegram.bot.platform.config package classes with fields, annotated as @Value. You can modify default configurations setting it in application.yml.
 
+# Monitoring
 
+Platform exposes application metrics via jmx.metrics:
+
+- **bot.api.client.process.error** number of errors in processing
+- **bot.api.client.message.received** number of message received overall
+- **bot.message.processing.{$processocClassName.methodName}.exception** number of errors in client message processor
+- **bot.message.processing.{$processocClassName.methodName}.execution.time** execution time histogram in client message processor
+- **bot.message.processing.{$processocClassName.methodName}.success** number of successfuly processed in client message processor
+- **bot.message.processor.not.found** number of messages that haven't been processed due to lack of processor routing
+- **bot.updates.worker.repository.get** message repository get execution time
+- **bot.updates.worker.repository.save** message repository save execution time
 
