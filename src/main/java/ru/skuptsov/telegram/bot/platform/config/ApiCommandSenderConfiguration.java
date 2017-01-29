@@ -41,6 +41,9 @@ public class ApiCommandSenderConfiguration {
     private Boolean allowPoolingConnections;
 
     @Autowired
+    private ClientProxyConfiguration clientProxyConfiguration;
+
+    @Autowired
     private TelegramBotClientConfiguration telegramBotClientConfiguration;
 
     @Bean(name = "commandSenderBotApi")
@@ -55,7 +58,8 @@ public class ApiCommandSenderConfiguration {
                 .setConnectTimeout(connectTimeout)
                 .setReadTimeout(readTimeout)
                 .setMaxRequestRetry(maxRequestRetry)
-                .setMaxConnectionsPerHost(maxConnectionsPerHost);
+                .setMaxConnectionsPerHost(maxConnectionsPerHost)
+                .setProxyServer(clientProxyConfiguration.getProxyServer());
 
         return new AsyncHttpClient(asyncHttpClientConfigBuilder
                 .build());

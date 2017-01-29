@@ -41,6 +41,9 @@ public class UpdatesRepositoryConfiguration {
     private Boolean allowPoolingConnections;
 
     @Autowired
+    private ClientProxyConfiguration clientProxyConfiguration;
+
+    @Autowired
     private TelegramBotClientConfiguration telegramBotClientConfiguration;
 
     @Bean
@@ -59,7 +62,8 @@ public class UpdatesRepositoryConfiguration {
                 .setConnectTimeout(connectTimeout)
                 .setReadTimeout(readTimeout)
                 .setMaxRequestRetry(maxRequestRetry)
-                .setMaxConnectionsPerHost(maxConnectionsPerHost);
+                .setMaxConnectionsPerHost(maxConnectionsPerHost)
+                .setProxyServer(clientProxyConfiguration.getProxyServer());
 
         return new AsyncHttpClient(asyncHttpClientConfigBuilder
                 .build());
