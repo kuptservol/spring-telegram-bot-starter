@@ -1,13 +1,12 @@
 package ru.skuptsov.telegram.bot.platform.model.api.methods.send;
 
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.databind.SerializerProvider;
-import com.fasterxml.jackson.databind.jsontype.TypeSerializer;
-import org.json.JSONObject;
-import org.telegram.telegrambots.Constants;
+import com.fasterxml.jackson.core.type.TypeReference;
 import org.telegram.telegrambots.api.methods.BotApiMethod;
+import org.telegram.telegrambots.api.methods.PartialBotApiMethod;
 import org.telegram.telegrambots.api.objects.Message;
+import org.telegram.telegrambots.api.objects.replykeyboard.ApiResponse;
 import org.telegram.telegrambots.api.objects.replykeyboard.ReplyKeyboard;
+import org.telegram.telegrambots.exceptions.TelegramApiRequestException;
 import org.telegram.telegrambots.exceptions.TelegramApiValidationException;
 
 import java.io.File;
@@ -31,7 +30,7 @@ public class SendPhoto extends BotApiMethod<Message> {
     public static final String REPLYTOMESSAGEID_FIELD = "reply_to_message_id";
     public static final String REPLYMARKUP_FIELD = "reply_markup";
     private String chatId; ///< Unique identifier for the chat to send the message to (Or username for channels)
-    private String photo; ///< Photo to send. file_id as String to resend a photo that is already on the Telegram servers
+    private String photo; ///< Photo to send. file_id as String to resend a photo that is already on the Telegram servers or URL to upload it
     private String caption; ///< Optional Photo caption (may also be used when resending photos by file_id).
     /**
      * Optional. Sends the message silently. iOS users will not receive a notification, Android
@@ -50,12 +49,23 @@ public class SendPhoto extends BotApiMethod<Message> {
         super();
     }
 
+    @Override
+    public String getMethod() {
+        return PATH;
+    }
+
     public String getChatId() {
         return chatId;
     }
 
     public SendPhoto setChatId(String chatId) {
         this.chatId = chatId;
+        return this;
+    }
+
+    public SendPhoto setChatId(Long chatId) {
+        Objects.requireNonNull(chatId);
+        this.chatId = chatId.toString();
         return this;
     }
 
@@ -96,38 +106,6 @@ public class SendPhoto extends BotApiMethod<Message> {
         return this;
     }
 
-    /**
-     * @deprecated Use {@link #getReplyToMessageId()} instead.
-     */
-    @Deprecated
-    public Integer getReplayToMessageId() {
-        return getReplyToMessageId();
-    }
-
-    /**
-     * @deprecated Use {@link #setReplyToMessageId(Integer)} instead.
-     */
-    @Deprecated
-    public SendPhoto setReplayToMessageId(Integer replyToMessageId) {
-        return setReplyToMessageId(replyToMessageId);
-    }
-
-    /**
-     * @deprecated Use {@link #getReplyMarkup()} instead.
-     */
-    @Deprecated
-    public ReplyKeyboard getReplayMarkup() {
-        return getReplyMarkup();
-    }
-
-    /**
-     * @deprecated Use {@link #setReplyMarkup(ReplyKeyboard)} instead.
-     */
-    @Deprecated
-    public SendPhoto setReplayMarkup(ReplyKeyboard replyMarkup) {
-        return setReplyMarkup(replyMarkup);
-    }
-
     public boolean isNewPhoto() {
         return isNewPhoto;
     }
@@ -158,35 +136,55 @@ public class SendPhoto extends BotApiMethod<Message> {
         return this;
     }
 
-    /**
-     * Use this method to set the photo to a new file
-     *
-     * @param photo     Path to the new file in your server
-     * @param photoName Name of the file itself
-     * @deprecated use {@link #setNewPhoto(File)} or {@link #setNewPhoto(InputStream)} instead.
-     */
-    @Deprecated
-    public SendPhoto setNewPhoto(String photo, String photoName) {
-        this.photo = photo;
-        this.isNewPhoto = true;
-        this.photoName = photoName;
-        return this;
-    }
-
     public SendPhoto setNewPhoto(File file) {
-        this.photo = file.getName();
         this.newPhotoFile = file;
         this.isNewPhoto = true;
         return this;
     }
 
     public SendPhoto setNewPhoto(String photoName, InputStream inputStream) {
-        Objects.requireNonNull(photoName, "photoName cannot be null!");
-        Objects.requireNonNull(inputStream, "inputStream cannot be null!");
-        this.photoName = photoName;
+    	Objects.requireNonNull(photoName, "photoName cannot be null!");
+    	Objects.requireNonNull(inputStream, "inputStream cannot be null!");
+    	this.photoName = photoName;
         this.newPhotoStream = inputStream;
         this.isNewPhoto = true;
         return this;
+    }
+
+    @Override
+    public Message deserializeResponse(String answer) throws TelegramApiRequestException {
+        try {
+            ApiResponse<Message> result = OBJECT_MAPPER.readValue(answer,
+                    new TypeReference<ApiResponse<Message>>(){});
+            if (result.getOk()) {
+                return result.getResult();
+            } else {
+                throw new TelegramApiRequestException("Error sending photo", result);
+            }
+        } catch (IOException e) {
+            throw new TelegramApiRequestException("Unable to deserialize response", e);
+        }
+    }
+
+    @Override
+    public void validate() throws TelegramApiValidationException {
+        if (chatId == null) {
+            throw new TelegramApiValidationException("ChatId parameter can't be empty", this);
+        }
+
+        if (isNewPhoto) {
+            if (newPhotoFile == null && newPhotoStream == null) {
+                throw new TelegramApiValidationException("Photo can't be empty", this);
+            }
+            if (newPhotoStream != null && (photoName == null || photoName.isEmpty())) {
+                throw new TelegramApiValidationException("Photo name can't be empty", this);
+            }
+        } else if (photo == null) {
+            throw new TelegramApiValidationException("Photo can't be empty", this);
+        }
+        if (replyMarkup != null) {
+            replyMarkup.validate();
+        }
     }
 
     @Override
@@ -199,76 +197,5 @@ public class SendPhoto extends BotApiMethod<Message> {
                 ", replyMarkup=" + replyMarkup +
                 ", isNewPhoto=" + isNewPhoto +
                 '}';
-    }
-
-    @Override
-    public String getPath() {
-        return PATH;
-    }
-
-    @Override
-    public Message deserializeResponse(JSONObject answer) {
-        if (answer.getBoolean(Constants.RESPONSEFIELDOK)) {
-            return new Message(answer.getJSONObject(Constants.RESPONSEFIELDRESULT));
-        }
-        return null;
-    }
-
-    @Override
-    public void serialize(JsonGenerator gen, SerializerProvider serializerProvider) throws IOException {
-        gen.writeStartObject();
-        gen.writeStringField(METHOD_FIELD, PATH);
-        gen.writeStringField(CHATID_FIELD, chatId);
-        gen.writeStringField(PHOTO_FIELD, photo);
-        if (caption != null) {
-            gen.writeStringField(CAPTION_FIELD, caption);
-        }
-
-        if (disableNotification != null) {
-            gen.writeBooleanField(DISABLENOTIFICATION_FIELD, disableNotification);
-        }
-        if (replyToMessageId != null) {
-            gen.writeNumberField(REPLYTOMESSAGEID_FIELD, replyToMessageId);
-        }
-        if (replyMarkup != null) {
-            gen.writeObjectField(REPLYMARKUP_FIELD, replyMarkup);
-        }
-
-        gen.writeEndObject();
-        gen.flush();
-    }
-
-    @Override
-    public void serializeWithType(JsonGenerator jsonGenerator, SerializerProvider serializerProvider, TypeSerializer typeSerializer) throws IOException {
-        serialize(jsonGenerator, serializerProvider);
-    }
-
-    @Override
-    public JSONObject toJson() {
-        JSONObject jsonObject = new JSONObject();
-        jsonObject.put(CHATID_FIELD, chatId);
-        jsonObject.put(PHOTO_FIELD, photo);
-        if (caption != null) {
-            jsonObject.put(CAPTION_FIELD, caption);
-        }
-
-        if (disableNotification != null) {
-            jsonObject.put(DISABLENOTIFICATION_FIELD, disableNotification);
-        }
-        if (replyToMessageId != null) {
-            jsonObject.put(REPLYTOMESSAGEID_FIELD, replyToMessageId);
-        }
-        if (replyMarkup != null) {
-            jsonObject.put(REPLYMARKUP_FIELD, replyMarkup.toJson());
-        }
-
-        return jsonObject;
-    }
-
-    @Override
-    public void validate() throws TelegramApiValidationException {
-        if (chatId == null) {
-            throw new TelegramApiValidationException("ChatId can't be null", this);
-        }
     }
 }

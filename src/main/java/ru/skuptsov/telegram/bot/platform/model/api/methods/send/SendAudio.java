@@ -1,18 +1,18 @@
 package ru.skuptsov.telegram.bot.platform.model.api.methods.send;
 
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.databind.SerializerProvider;
-import com.fasterxml.jackson.databind.jsontype.TypeSerializer;
-import org.json.JSONObject;
-import org.telegram.telegrambots.Constants;
+import com.fasterxml.jackson.core.type.TypeReference;
 import org.telegram.telegrambots.api.methods.BotApiMethod;
+import org.telegram.telegrambots.api.methods.PartialBotApiMethod;
 import org.telegram.telegrambots.api.objects.Message;
+import org.telegram.telegrambots.api.objects.replykeyboard.ApiResponse;
 import org.telegram.telegrambots.api.objects.replykeyboard.ReplyKeyboard;
+import org.telegram.telegrambots.exceptions.TelegramApiRequestException;
 import org.telegram.telegrambots.exceptions.TelegramApiValidationException;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.Serializable;
 import java.util.Objects;
 
 /**
@@ -36,10 +36,11 @@ public class SendAudio extends BotApiMethod<Message> {
     public static final String REPLYMARKUP_FIELD = "reply_markup";
     public static final String PERFOMER_FIELD = "performer";
     public static final String TITLE_FIELD = "title";
+    public static final String CAPTION_FIELD = "caption";
 
     private Integer duration; ///< Integer	Duration of the audio in seconds as defined by sender
     private String chatId; ///< Unique identifier for the chat to send the message to (or Username fro channels)
-    private String audio; ///< Audio file to send. file_id as String to resend an audio that is already on the Telegram servers
+    private String audio; ///< Audio file to send. file_id as String to resend an audio that is already on the Telegram servers or Url to upload it
     private Integer replyToMessageId; ///< Optional. If the message is a reply, ID of the original message
     /**
      * Optional. Sends the message silently. iOS users will not receive a notification, Android
@@ -49,6 +50,7 @@ public class SendAudio extends BotApiMethod<Message> {
     private ReplyKeyboard replyMarkup; ///< Optional. JSON-serialized object for a custom reply keyboard
     private String performer; ///< Optional. Performer of sent audio
     private String title; ///< Optional. Title of sent audio
+    private String caption; ///< Optional. Audio caption (may also be used when resending documents by file_id), 0-200 characters
 
     private boolean isNewAudio; ///< True to upload a new audio, false to use a fileId
     private String audioName;
@@ -57,6 +59,11 @@ public class SendAudio extends BotApiMethod<Message> {
 
     public SendAudio() {
         super();
+    }
+
+    @Override
+    public String getMethod() {
+        return PATH;
     }
 
     public Integer getDuration() {
@@ -74,6 +81,12 @@ public class SendAudio extends BotApiMethod<Message> {
 
     public SendAudio setChatId(String chatId) {
         this.chatId = chatId;
+        return this;
+    }
+
+    public SendAudio setChatId(Long chatId) {
+        Objects.requireNonNull(chatId);
+        this.chatId = chatId.toString();
         return this;
     }
 
@@ -96,34 +109,18 @@ public class SendAudio extends BotApiMethod<Message> {
     /**
      * Use this method to set the audio to a new file
      *
-     * @param audio     Path to the new file in your server
-     * @param audioName Name of the file itself
-     * @deprecated use {@link #setNewAudio(File)} or {@link #setNewAudio(InputStream)} instead.
-     */
-    @Deprecated
-    public SendAudio setNewAudio(String audio, String audioName) {
-        this.audio = audio;
-        this.isNewAudio = true;
-        this.audioName = audioName;
-        return this;
-    }
-
-    /**
-     * Use this method to set the audio to a new file
-     *
      * @param file New audio file
      */
     public SendAudio setNewAudio(File file) {
-        this.audio = file.getName();
         this.isNewAudio = true;
         this.newAudioFile = file;
         return this;
     }
 
     public SendAudio setNewAudio(String audioName, InputStream inputStream) {
-        Objects.requireNonNull(audioName, "audioName cannot be null!");
-        Objects.requireNonNull(inputStream, "inputStream cannot be null!");
-        this.audioName = audioName;
+    	Objects.requireNonNull(audioName, "audioName cannot be null!");
+    	Objects.requireNonNull(inputStream, "inputStream cannot be null!");
+    	this.audioName = audioName;
         this.isNewAudio = true;
         this.newAudioStream = inputStream;
         return this;
@@ -145,38 +142,6 @@ public class SendAudio extends BotApiMethod<Message> {
     public SendAudio setReplyMarkup(ReplyKeyboard replyMarkup) {
         this.replyMarkup = replyMarkup;
         return this;
-    }
-
-    /**
-     * @deprecated Use {@link #getReplyToMessageId()} instead.
-     */
-    @Deprecated
-    public Integer getReplayToMessageId() {
-        return getReplyToMessageId();
-    }
-
-    /**
-     * @deprecated Use {@link #setReplyToMessageId(Integer)} instead.
-     */
-    @Deprecated
-    public SendAudio setReplayToMessageId(Integer replyToMessageId) {
-        return setReplyToMessageId(replyToMessageId);
-    }
-
-    /**
-     * @deprecated Use {@link #getReplyMarkup()} instead.
-     */
-    @Deprecated
-    public ReplyKeyboard getReplayMarkup() {
-        return getReplyMarkup();
-    }
-
-    /**
-     * @deprecated Use {@link #setReplyMarkup(ReplyKeyboard)} instead.
-     */
-    @Deprecated
-    public SendAudio setReplayMarkup(ReplyKeyboard replyMarkup) {
-        return setReplyMarkup(replyMarkup);
     }
 
     public String getPerformer() {
@@ -227,101 +192,68 @@ public class SendAudio extends BotApiMethod<Message> {
         return newAudioStream;
     }
 
-    @Override
-    public String toString() {
-        return "SendAudio{" +
-                "chatId='" + chatId + '\'' +
-                ", audio='" + audio + '\'' +
-                ", replyToMessageId=" + replyToMessageId +
-                ", replyMarkup=" + replyMarkup +
-                ", performer='" + performer + '\'' +
-                ", title='" + title + '\'' +
-                ", isNewAudio=" + isNewAudio +
-                '}';
+    public String getCaption() {
+        return caption;
+    }
+
+    public SendAudio setCaption(String caption) {
+        this.caption = caption;
+        return this;
     }
 
     @Override
-    public String getPath() {
-        return PATH;
-    }
-
-    @Override
-    public Message deserializeResponse(JSONObject answer) {
-        if (answer.getBoolean(Constants.RESPONSEFIELDOK)) {
-            return new Message(answer.getJSONObject(Constants.RESPONSEFIELDRESULT));
+    public Message deserializeResponse(String answer) throws TelegramApiRequestException {
+        try {
+            ApiResponse<Message> result = OBJECT_MAPPER.readValue(answer,
+                    new TypeReference<ApiResponse<Message>>(){});
+            if (result.getOk()) {
+                return result.getResult();
+            } else {
+                throw new TelegramApiRequestException("Error sending audio", result);
+            }
+        } catch (IOException e) {
+            throw new TelegramApiRequestException("Unable to deserialize response", e);
         }
-        return null;
-    }
-
-    @Override
-    public void serialize(JsonGenerator gen, SerializerProvider serializerProvider) throws IOException {
-        gen.writeStartObject();
-        gen.writeStringField(METHOD_FIELD, PATH);
-        gen.writeStringField(CHATID_FIELD, chatId);
-        if (duration != null) {
-            gen.writeStringField(DURATION_FIELD, duration.toString());
-        }
-        gen.writeStringField(AUDIO_FIELD, audio);
-        if (performer != null) {
-            gen.writeStringField(PERFOMER_FIELD, performer);
-        }
-
-        if (title != null) {
-            gen.writeStringField(TITLE_FIELD, title);
-        }
-
-        if (disableNotification != null) {
-            gen.writeBooleanField(DISABLENOTIFICATION_FIELD, disableNotification);
-        }
-        if (replyToMessageId != null) {
-            gen.writeNumberField(REPLYTOMESSAGEID_FIELD, replyToMessageId);
-        }
-        if (replyMarkup != null) {
-            gen.writeObjectField(REPLYMARKUP_FIELD, replyMarkup);
-        }
-
-        gen.writeEndObject();
-        gen.flush();
-    }
-
-    @Override
-    public void serializeWithType(JsonGenerator jsonGenerator, SerializerProvider serializerProvider, TypeSerializer typeSerializer) throws IOException {
-        serialize(jsonGenerator, serializerProvider);
-    }
-
-    @Override
-    public JSONObject toJson() {
-        JSONObject jsonObject = new JSONObject();
-        jsonObject.put(CHATID_FIELD, chatId);
-        if (duration != null) {
-            jsonObject.put(DURATION_FIELD, duration);
-        }
-        jsonObject.put(AUDIO_FIELD, audio);
-        if (performer != null) {
-            jsonObject.put(PERFOMER_FIELD, performer);
-        }
-
-        if (title != null) {
-            jsonObject.put(TITLE_FIELD, title);
-        }
-
-        if (disableNotification != null) {
-            jsonObject.put(DISABLENOTIFICATION_FIELD, disableNotification);
-        }
-        if (replyToMessageId != null) {
-            jsonObject.put(REPLYTOMESSAGEID_FIELD, replyToMessageId);
-        }
-        if (replyMarkup != null) {
-            jsonObject.put(REPLYMARKUP_FIELD, replyMarkup.toJson());
-        }
-
-        return jsonObject;
     }
 
     @Override
     public void validate() throws TelegramApiValidationException {
         if (chatId == null) {
-            throw new TelegramApiValidationException("ChatId can't be null", this);
+            throw new TelegramApiValidationException("ChatId parameter can't be empty", this);
         }
+
+        if (isNewAudio) {
+            if (newAudioFile == null && newAudioStream == null) {
+                throw new TelegramApiValidationException("Audio can't be empty", this);
+            }
+            if (newAudioStream != null && (audioName == null || audioName.isEmpty())) {
+                throw new TelegramApiValidationException("Audio name can't be empty", this);
+            }
+        } else if (audio == null) {
+            throw new TelegramApiValidationException("Audio can't be empty", this);
+        }
+
+        if (replyMarkup != null) {
+            replyMarkup.validate();
+        }
+    }
+
+    @Override
+    public String toString() {
+        return "SendAudio{" +
+                "duration=" + duration +
+                ", chatId='" + chatId + '\'' +
+                ", audio='" + audio + '\'' +
+                ", replyToMessageId=" + replyToMessageId +
+                ", disableNotification=" + disableNotification +
+                ", replyMarkup=" + replyMarkup +
+                ", performer='" + performer + '\'' +
+                ", title='" + title + '\'' +
+                ", isNewAudio=" + isNewAudio +
+                ", audioName='" + audioName + '\'' +
+                ", newAudioFile=" + newAudioFile +
+                ", newAudioStream=" + newAudioStream +
+                ", caption='" + caption + '\'' +
+                '}';
     }
 }

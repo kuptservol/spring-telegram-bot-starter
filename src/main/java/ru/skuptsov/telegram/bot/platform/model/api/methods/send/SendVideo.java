@@ -1,13 +1,12 @@
 package ru.skuptsov.telegram.bot.platform.model.api.methods.send;
 
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.databind.SerializerProvider;
-import com.fasterxml.jackson.databind.jsontype.TypeSerializer;
-import org.json.JSONObject;
-import org.telegram.telegrambots.Constants;
+import com.fasterxml.jackson.core.type.TypeReference;
 import org.telegram.telegrambots.api.methods.BotApiMethod;
+import org.telegram.telegrambots.api.methods.PartialBotApiMethod;
 import org.telegram.telegrambots.api.objects.Message;
+import org.telegram.telegrambots.api.objects.replykeyboard.ApiResponse;
 import org.telegram.telegrambots.api.objects.replykeyboard.ReplyKeyboard;
+import org.telegram.telegrambots.exceptions.TelegramApiRequestException;
 import org.telegram.telegrambots.exceptions.TelegramApiValidationException;
 
 import java.io.File;
@@ -35,7 +34,7 @@ public class SendVideo extends BotApiMethod<Message> {
     public static final String REPLYTOMESSAGEID_FIELD = "reply_to_message_id";
     public static final String REPLYMARKUP_FIELD = "reply_markup";
     private String chatId; ///< Unique identifier for the chat to send the message to (Or username for channels)
-    private String video; ///< Video to send. file_id as String to resend a video that is already on the Telegram servers
+    private String video; ///< Video to send. file_id as String to resend a video that is already on the Telegram servers or URL to upload it
     private Integer duration; ///< Optional. Duration of sent video in seconds
     private String caption; ///< OptionaL. Video caption (may also be used when resending videos by file_id).
     private Integer width; ///< Optional. Video width
@@ -57,6 +56,11 @@ public class SendVideo extends BotApiMethod<Message> {
         super();
     }
 
+    @Override
+    public String getMethod() {
+        return PATH;
+    }
+
     public String getChatId() {
         return chatId;
     }
@@ -73,6 +77,12 @@ public class SendVideo extends BotApiMethod<Message> {
     public SendVideo setVideo(String video) {
         this.video = video;
         this.isNewVideo = false;
+        return this;
+    }
+
+    public SendVideo setChatId(Long chatId) {
+        Objects.requireNonNull(chatId);
+        this.chatId = chatId.toString();
         return this;
     }
 
@@ -110,38 +120,6 @@ public class SendVideo extends BotApiMethod<Message> {
     public SendVideo setReplyMarkup(ReplyKeyboard replyMarkup) {
         this.replyMarkup = replyMarkup;
         return this;
-    }
-
-    /**
-     * @deprecated Use {@link #getReplyToMessageId()} instead.
-     */
-    @Deprecated
-    public Integer getReplayToMessageId() {
-        return getReplyToMessageId();
-    }
-
-    /**
-     * @deprecated Use {@link #setReplyToMessageId(Integer)} instead.
-     */
-    @Deprecated
-    public SendVideo setReplayToMessageId(Integer replyToMessageId) {
-        return setReplyToMessageId(replyToMessageId);
-    }
-
-    /**
-     * @deprecated Use {@link #getReplyMarkup()} instead.
-     */
-    @Deprecated
-    public ReplyKeyboard getReplayMarkup() {
-        return getReplyMarkup();
-    }
-
-    /**
-     * @deprecated Use {@link #setReplyMarkup(ReplyKeyboard)} instead.
-     */
-    @Deprecated
-    public SendVideo setReplayMarkup(ReplyKeyboard replyMarkup) {
-        return setReplyMarkup(replyMarkup);
     }
 
     public boolean isNewVideo() {
@@ -192,35 +170,55 @@ public class SendVideo extends BotApiMethod<Message> {
         return this;
     }
 
-    /**
-     * Use this method to set the video to a new file
-     *
-     * @param video     Path to the new file in your server
-     * @param videoName Name of the file itself
-     * @deprecated use {@link #setNewVideo(File)} or {@link #setNewVideo(InputStream)} instead.
-     */
-    @Deprecated
-    public SendVideo setNewVideo(String video, String videoName) {
-        this.video = video;
-        this.isNewVideo = true;
-        this.videoName = videoName;
-        return this;
-    }
-
     public SendVideo setNewVideo(File file) {
-        this.video = file.getName();
         this.isNewVideo = true;
         this.newVideoFile = file;
         return this;
     }
 
     public SendVideo setNewVideo(String videoName, InputStream inputStream) {
-        Objects.requireNonNull(videoName, "videoName cannot be null!");
-        Objects.requireNonNull(inputStream, "inputStream cannot be null!");
-        this.videoName = videoName;
+    	Objects.requireNonNull(videoName, "videoName cannot be null!");
+    	Objects.requireNonNull(inputStream, "inputStream cannot be null!");
+    	this.videoName = videoName;
         this.isNewVideo = true;
         this.newVideoStream = inputStream;
         return this;
+    }
+
+    @Override
+    public Message deserializeResponse(String answer) throws TelegramApiRequestException {
+        try {
+            ApiResponse<Message> result = OBJECT_MAPPER.readValue(answer,
+                    new TypeReference<ApiResponse<Message>>(){});
+            if (result.getOk()) {
+                return result.getResult();
+            } else {
+                throw new TelegramApiRequestException("Error sending video", result);
+            }
+        } catch (IOException e) {
+            throw new TelegramApiRequestException("Unable to deserialize response", e);
+        }
+    }
+
+    @Override
+    public void validate() throws TelegramApiValidationException {
+        if (chatId == null) {
+            throw new TelegramApiValidationException("ChatId parameter can't be empty", this);
+        }
+
+        if (isNewVideo) {
+            if (newVideoFile == null && newVideoStream == null) {
+                throw new TelegramApiValidationException("Video can't be empty", this);
+            }
+            if (newVideoStream != null && (videoName == null || videoName.isEmpty())) {
+                throw new TelegramApiValidationException("Video name can't be empty", this);
+            }
+        } else if (video == null) {
+            throw new TelegramApiValidationException("Video can't be empty", this);
+        }
+        if (replyMarkup != null) {
+            replyMarkup.validate();
+        }
     }
 
     @Override
@@ -234,102 +232,5 @@ public class SendVideo extends BotApiMethod<Message> {
                 ", replyMarkup=" + replyMarkup +
                 ", isNewVideo=" + isNewVideo +
                 '}';
-    }
-
-    @Override
-    public String getPath() {
-        return PATH;
-    }
-
-    @Override
-    public Message deserializeResponse(JSONObject answer) {
-        if (answer.getBoolean(Constants.RESPONSEFIELDOK)) {
-            return new Message(answer.getJSONObject(Constants.RESPONSEFIELDRESULT));
-        }
-        return null;
-    }
-
-    @Override
-    public void serialize(JsonGenerator gen, SerializerProvider serializerProvider) throws IOException {
-        gen.writeStartObject();
-        gen.writeStringField(METHOD_FIELD, PATH);
-        gen.writeStringField(CHATID_FIELD, chatId);
-        gen.writeStringField(VIDEO_FIELD, video);
-
-        if (duration != null) {
-            gen.writeStringField(DURATION_FIELD, duration.toString());
-        }
-
-        if (caption != null) {
-            gen.writeStringField(CAPTION_FIELD, caption);
-        }
-
-        if (width != null) {
-            gen.writeStringField(WIDTH_FIELD, width.toString());
-        }
-
-        if (height != null) {
-            gen.writeStringField(HEIGHT_FIELD, height.toString());
-        }
-
-        if (disableNotification != null) {
-            gen.writeBooleanField(DISABLENOTIFICATION_FIELD, disableNotification);
-        }
-        if (replyToMessageId != null) {
-            gen.writeNumberField(REPLYTOMESSAGEID_FIELD, replyToMessageId);
-        }
-        if (replyMarkup != null) {
-            gen.writeObjectField(REPLYMARKUP_FIELD, replyMarkup);
-        }
-
-        gen.writeEndObject();
-        gen.flush();
-    }
-
-    @Override
-    public void serializeWithType(JsonGenerator jsonGenerator, SerializerProvider serializerProvider, TypeSerializer typeSerializer) throws IOException {
-        serialize(jsonGenerator, serializerProvider);
-    }
-
-    @Override
-    public JSONObject toJson() {
-        JSONObject jsonObject = new JSONObject();
-        jsonObject.put(CHATID_FIELD, chatId);
-        jsonObject.put(VIDEO_FIELD, video);
-
-        if (duration != null) {
-            jsonObject.put(DURATION_FIELD, duration.toString());
-        }
-
-        if (caption != null) {
-            jsonObject.put(CAPTION_FIELD, caption);
-        }
-
-        if (width != null) {
-            jsonObject.put(WIDTH_FIELD, width.toString());
-        }
-
-        if (height != null) {
-            jsonObject.put(HEIGHT_FIELD, height.toString());
-        }
-
-        if (disableNotification != null) {
-            jsonObject.put(DISABLENOTIFICATION_FIELD, disableNotification);
-        }
-        if (replyToMessageId != null) {
-            jsonObject.put(REPLYTOMESSAGEID_FIELD, replyToMessageId);
-        }
-        if (replyMarkup != null) {
-            jsonObject.put(REPLYMARKUP_FIELD, replyMarkup.toJson());
-        }
-
-        return jsonObject;
-    }
-
-    @Override
-    public void validate() throws TelegramApiValidationException {
-        if (chatId == null) {
-            throw new TelegramApiValidationException("ChatId can't be null", this);
-        }
     }
 }

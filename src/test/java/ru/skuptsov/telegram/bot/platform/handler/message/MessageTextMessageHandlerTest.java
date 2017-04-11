@@ -128,7 +128,7 @@ public class MessageTextMessageHandlerTest extends AbstractTestNGSpringContextTe
 
         @Override
         protected boolean isEqual(SendMessage that) {
-            return Objects.equals(that.getPath(), expected.getPath()) &&
+            return Objects.equals(that.getMethod(), expected.getMethod()) &&
                     Objects.equals(that.getText(), expected.getText()) &&
                     Objects.equals(that.getChatId(), expected.getChatId());
         }

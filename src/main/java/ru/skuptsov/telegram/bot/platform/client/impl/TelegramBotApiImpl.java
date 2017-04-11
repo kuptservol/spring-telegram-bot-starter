@@ -71,7 +71,7 @@ public class TelegramBotApiImpl implements TelegramBotApi {
     @Override
     public <T extends BotApiMethod<Message>> Future<Message> sendMessageAsync(@NotNull T message) {
         return client.executePost(
-                message.getPath(),
+                message.getMethod(),
                 message,
                 simpleTypeOf(Message.class)
         );
@@ -80,12 +80,12 @@ public class TelegramBotApiImpl implements TelegramBotApi {
     @Override
     public <T extends BotApiMethod<Message>> Optional<Message> sendMessageSync(@NotNull T message) {
         Future<Message> messageFuture = client.executePost(
-                message.getPath(),
+                message.getMethod(),
                 message,
                 simpleTypeOf(Message.class)
         );
 
-        return executeSync(messageFuture, message.getPath());
+        return executeSync(messageFuture, message.getMethod());
     }
 
     @Override

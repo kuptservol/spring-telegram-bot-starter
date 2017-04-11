@@ -2,7 +2,7 @@ package ru.skuptsov.telegram.bot.platform.client.command.impl;
 
 import lombok.Getter;
 import lombok.ToString;
-import org.telegram.telegrambots.api.methods.updatingmessages.EditMessageText;
+import ru.skuptsov.telegram.bot.platform.model.updatingmessages.EditMessageText;
 
 /**
  * @author Sergey Kuptsov

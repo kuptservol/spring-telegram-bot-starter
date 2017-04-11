@@ -1,13 +1,12 @@
 package ru.skuptsov.telegram.bot.platform.model.api.methods.send;
 
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.databind.SerializerProvider;
-import com.fasterxml.jackson.databind.jsontype.TypeSerializer;
-import org.json.JSONObject;
-import org.telegram.telegrambots.Constants;
+import com.fasterxml.jackson.core.type.TypeReference;
 import org.telegram.telegrambots.api.methods.BotApiMethod;
+import org.telegram.telegrambots.api.methods.PartialBotApiMethod;
 import org.telegram.telegrambots.api.objects.Message;
+import org.telegram.telegrambots.api.objects.replykeyboard.ApiResponse;
 import org.telegram.telegrambots.api.objects.replykeyboard.ReplyKeyboard;
+import org.telegram.telegrambots.exceptions.TelegramApiRequestException;
 import org.telegram.telegrambots.exceptions.TelegramApiValidationException;
 
 import java.io.File;
@@ -31,7 +30,7 @@ public class SendDocument extends BotApiMethod<Message> {
     public static final String REPLYTOMESSAGEID_FIELD = "reply_to_message_id";
     public static final String REPLYMARKUP_FIELD = "reply_markup";
     private String chatId; ///< Unique identifier for the chat to send the message to or Username for the channel to send the message to
-    private String document; ///< File file to send. file_id as String to resend a file that is already on the Telegram servers
+    private String document; ///< File file to send. file_id as String to resend a file that is already on the Telegram servers or Url to upload it
     private String caption; ///< Optional. Document caption (may also be used when resending documents by file_id), 0-200 characters
     /**
      * Optional. Sends the message silently. iOS users will not receive a notification, Android
@@ -50,12 +49,23 @@ public class SendDocument extends BotApiMethod<Message> {
         super();
     }
 
+    @Override
+    public String getMethod() {
+        return PATH;
+    }
+
     public String getChatId() {
         return chatId;
     }
 
     public SendDocument setChatId(String chatId) {
         this.chatId = chatId;
+        return this;
+    }
+
+    public SendDocument setChatId(Long chatId) {
+        Objects.requireNonNull(chatId);
+        this.chatId = chatId.toString();
         return this;
     }
 
@@ -78,34 +88,19 @@ public class SendDocument extends BotApiMethod<Message> {
     /**
      * Use this method to set the document to a new file
      *
-     * @param document     Path to the new file in your server
-     * @param documentName Name of the file itself
-     * @deprecated use {@link #setNewDocument(File)} or {@link #setNewDocument(InputStream)} instead.
-     */
-    @Deprecated
-    public SendDocument setNewDocument(String document, String documentName) {
-        this.document = document;
-        this.isNewDocument = true;
-        this.documentName = documentName;
-        return this;
-    }
-
-    /**
-     * Use this method to set the document to a new file
-     *
      * @param file New document file
      */
     public SendDocument setNewDocument(File file) {
-        this.document = file.getName();
+        Objects.requireNonNull(file, "documentName cannot be null!");
         this.isNewDocument = true;
         this.newDocumentFile = file;
         return this;
     }
 
     public SendDocument setNewDocument(String documentName, InputStream inputStream) {
-        Objects.requireNonNull(documentName, "documentName cannot be null!");
-        Objects.requireNonNull(inputStream, "inputStream cannot be null!");
-        this.documentName = documentName;
+    	Objects.requireNonNull(documentName, "documentName cannot be null!");
+    	Objects.requireNonNull(inputStream, "inputStream cannot be null!");
+    	this.documentName = documentName;
         this.isNewDocument = true;
         this.newDocumentStream = inputStream;
         return this;
@@ -134,22 +129,6 @@ public class SendDocument extends BotApiMethod<Message> {
     public SendDocument setReplyToMessageId(Integer replyToMessageId) {
         this.replyToMessageId = replyToMessageId;
         return this;
-    }
-
-    /**
-     * @deprecated Use {@link #getReplyToMessageId()} instead.
-     */
-    @Deprecated
-    public Integer getReplayToMessageId() {
-        return getReplyToMessageId();
-    }
-
-    /**
-     * @deprecated Use {@link #setReplyToMessageId(Integer)} instead.
-     */
-    @Deprecated
-    public SendDocument setReplayToMessageId(Integer replyToMessageId) {
-        return setReplyToMessageId(replyToMessageId);
     }
 
     public Boolean getDisableNotification() {
@@ -184,20 +163,41 @@ public class SendDocument extends BotApiMethod<Message> {
         return this;
     }
 
-    /**
-     * @deprecated Use {@link #getReplyMarkup()} instead.
-     */
-    @Deprecated
-    public ReplyKeyboard getReplayMarkup() {
-        return getReplyMarkup();
+    @Override
+    public Message deserializeResponse(String answer) throws TelegramApiRequestException {
+        try {
+            ApiResponse<Message> result = OBJECT_MAPPER.readValue(answer,
+                    new TypeReference<ApiResponse<Message>>(){});
+            if (result.getOk()) {
+                return result.getResult();
+            } else {
+                throw new TelegramApiRequestException("Error sending document", result);
+            }
+        } catch (IOException e) {
+            throw new TelegramApiRequestException("Unable to deserialize response", e);
+        }
     }
 
-    /**
-     * @deprecated Use {@link #setReplyMarkup(ReplyKeyboard)} instead.
-     */
-    @Deprecated
-    public SendDocument setReplayMarkup(ReplyKeyboard replyMarkup) {
-        return setReplyMarkup(replyMarkup);
+    @Override
+    public void validate() throws TelegramApiValidationException {
+        if (chatId == null) {
+            throw new TelegramApiValidationException("ChatId parameter can't be empty", this);
+        }
+
+        if (isNewDocument) {
+            if (newDocumentFile == null && newDocumentStream == null) {
+                throw new TelegramApiValidationException("Document can't be empty", this);
+            }
+            if (newDocumentStream != null && (documentName == null || documentName.isEmpty())) {
+                throw new TelegramApiValidationException("Document name can't be empty", this);
+            }
+        } else if (document == null) {
+            throw new TelegramApiValidationException("Document can't be empty", this);
+        }
+
+        if (replyMarkup != null) {
+            replyMarkup.validate();
+        }
     }
 
     @Override
@@ -209,76 +209,5 @@ public class SendDocument extends BotApiMethod<Message> {
                 ", replyMarkup=" + replyMarkup +
                 ", isNewDocument=" + isNewDocument +
                 '}';
-    }
-
-    @Override
-    public String getPath() {
-        return PATH;
-    }
-
-    @Override
-    public Message deserializeResponse(JSONObject answer) {
-        if (answer.getBoolean(Constants.RESPONSEFIELDOK)) {
-            return new Message(answer.getJSONObject(Constants.RESPONSEFIELDRESULT));
-        }
-        return null;
-    }
-
-    @Override
-    public void serialize(JsonGenerator gen, SerializerProvider serializerProvider) throws IOException {
-        gen.writeStartObject();
-        gen.writeStringField(METHOD_FIELD, PATH);
-        gen.writeStringField(CHATID_FIELD, chatId);
-        gen.writeStringField(DOCUMENT_FIELD, document);
-        if (caption != null) {
-            gen.writeStringField(CAPTION_FIELD, caption);
-        }
-
-        if (disableNotification != null) {
-            gen.writeBooleanField(DISABLENOTIFICATION_FIELD, disableNotification);
-        }
-        if (replyToMessageId != null) {
-            gen.writeNumberField(REPLYTOMESSAGEID_FIELD, replyToMessageId);
-        }
-        if (replyMarkup != null) {
-            gen.writeObjectField(REPLYMARKUP_FIELD, replyMarkup);
-        }
-
-        gen.writeEndObject();
-        gen.flush();
-    }
-
-    @Override
-    public void serializeWithType(JsonGenerator jsonGenerator, SerializerProvider serializerProvider, TypeSerializer typeSerializer) throws IOException {
-        serialize(jsonGenerator, serializerProvider);
-    }
-
-    @Override
-    public JSONObject toJson() {
-        JSONObject jsonObject = new JSONObject();
-        jsonObject.put(CHATID_FIELD, chatId);
-        jsonObject.put(DOCUMENT_FIELD, document);
-        if (caption != null) {
-            jsonObject.put(CAPTION_FIELD, caption);
-        }
-
-        if (disableNotification != null) {
-            jsonObject.put(DISABLENOTIFICATION_FIELD, disableNotification);
-        }
-        if (replyToMessageId != null) {
-            jsonObject.put(REPLYTOMESSAGEID_FIELD, replyToMessageId);
-        }
-        if (replyMarkup != null) {
-            jsonObject.put(REPLYMARKUP_FIELD, replyMarkup.toJson());
-        }
-
-        return jsonObject;
-    }
-
-    @Override
-    public void validate() throws TelegramApiValidationException {
-        if (chatId == null) {
-            throw new TelegramApiValidationException("ChatId can't be null", this);
-        }
     }
 }

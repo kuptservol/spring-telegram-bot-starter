@@ -1,18 +1,18 @@
 package ru.skuptsov.telegram.bot.platform.model.api.methods.send;
 
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.databind.SerializerProvider;
-import com.fasterxml.jackson.databind.jsontype.TypeSerializer;
-import org.json.JSONObject;
-import org.telegram.telegrambots.Constants;
+import com.fasterxml.jackson.core.type.TypeReference;
 import org.telegram.telegrambots.api.methods.BotApiMethod;
+import org.telegram.telegrambots.api.methods.PartialBotApiMethod;
 import org.telegram.telegrambots.api.objects.Message;
+import org.telegram.telegrambots.api.objects.replykeyboard.ApiResponse;
 import org.telegram.telegrambots.api.objects.replykeyboard.ReplyKeyboard;
+import org.telegram.telegrambots.exceptions.TelegramApiRequestException;
 import org.telegram.telegrambots.exceptions.TelegramApiValidationException;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.Serializable;
 import java.util.Objects;
 
 /**
@@ -30,7 +30,7 @@ public class SendSticker extends BotApiMethod<Message> {
     public static final String REPLYTOMESSAGEID_FIELD = "reply_to_message_id";
     public static final String REPLYMARKUP_FIELD = "reply_markup";
     private String chatId; ///< Unique identifier for the chat to send the message to (Or username for channels)
-    private String sticker; ///< Sticker file to send. file_id as String to resend a sticker that is already on the Telegram servers
+    private String sticker; ///< Sticker file to send. file_id as String to resend a sticker that is already on the Telegram servers or URL to upload it
     /**
      * Optional. Sends the message silently. iOS users will not receive a notification, Android
      * users will receive a notification with no sound. Other apps coming soon
@@ -48,12 +48,23 @@ public class SendSticker extends BotApiMethod<Message> {
         super();
     }
 
+    @Override
+    public String getMethod() {
+        return PATH;
+    }
+
     public String getChatId() {
         return chatId;
     }
 
     public SendSticker setChatId(String chatId) {
         this.chatId = chatId;
+        return this;
+    }
+
+    public SendSticker setChatId(Long chatId) {
+        Objects.requireNonNull(chatId);
+        this.chatId = chatId.toString();
         return this;
     }
 
@@ -85,64 +96,16 @@ public class SendSticker extends BotApiMethod<Message> {
         return this;
     }
 
-    /**
-     * @deprecated Use {@link #getReplyToMessageId()} instead.
-     */
-    @Deprecated
-    public Integer getReplayToMessageId() {
-        return getReplyToMessageId();
-    }
-
-    /**
-     * @deprecated Use {@link #setReplyToMessageId(Integer)} instead.
-     */
-    @Deprecated
-    public SendSticker setReplayToMessageId(Integer replyToMessageId) {
-        return setReplyToMessageId(replyToMessageId);
-    }
-
-    /**
-     * @deprecated Use {@link #getReplyMarkup()} instead.
-     */
-    @Deprecated
-    public ReplyKeyboard getReplayMarkup() {
-        return getReplyMarkup();
-    }
-
-    /**
-     * @deprecated Use {@link #setReplyMarkup(ReplyKeyboard)} instead.
-     */
-    @Deprecated
-    public SendSticker setReplayMarkup(ReplyKeyboard replyMarkup) {
-        return setReplyMarkup(replyMarkup);
-    }
-
-    /**
-     * Use this method to set the sticker to a new file
-     *
-     * @param sticker     Path to the new file in your server
-     * @param stickerName Name of the file itself
-     * @deprecated use {@link #setNewSticker(File)} or {@link #setNewSticker(InputStream)} instead.
-     */
-    @Deprecated
-    public SendSticker setSticker(String sticker, String stickerName) {
-        this.sticker = sticker;
-        this.isNewSticker = true;
-        this.stickerName = stickerName;
-        return this;
-    }
-
     public SendSticker setNewSticker(File file) {
-        this.sticker = file.getName();
         this.isNewSticker = true;
         this.newStickerFile = file;
         return this;
     }
 
     public SendSticker setNewSticker(String stickerName, InputStream inputStream) {
-        Objects.requireNonNull(stickerName, "stickerName cannot be null!");
-        Objects.requireNonNull(inputStream, "inputStream cannot be null!");
-        this.stickerName = stickerName;
+    	Objects.requireNonNull(stickerName, "stickerName cannot be null!");
+    	Objects.requireNonNull(inputStream, "inputStream cannot be null!");
+    	this.stickerName = stickerName;
         this.isNewSticker = true;
         this.newStickerStream = inputStream;
         return this;
@@ -179,6 +142,42 @@ public class SendSticker extends BotApiMethod<Message> {
     }
 
     @Override
+    public Message deserializeResponse(String answer) throws TelegramApiRequestException {
+        try {
+            ApiResponse<Message> result = OBJECT_MAPPER.readValue(answer,
+                    new TypeReference<ApiResponse<Message>>(){});
+            if (result.getOk()) {
+                return result.getResult();
+            } else {
+                throw new TelegramApiRequestException("Error sending sticker", result);
+            }
+        } catch (IOException e) {
+            throw new TelegramApiRequestException("Unable to deserialize response", e);
+        }
+    }
+
+    @Override
+    public void validate() throws TelegramApiValidationException {
+        if (chatId == null) {
+            throw new TelegramApiValidationException("ChatId parameter can't be empty", this);
+        }
+
+        if (isNewSticker) {
+            if (newStickerFile == null && newStickerStream == null) {
+                throw new TelegramApiValidationException("Sticker can't be empty", this);
+            }
+            if (newStickerStream != null && (stickerName == null || stickerName.isEmpty())) {
+                throw new TelegramApiValidationException("Sticker name can't be empty", this);
+            }
+        } else if (sticker == null) {
+            throw new TelegramApiValidationException("Sticker can't be empty", this);
+        }
+        if (replyMarkup != null) {
+            replyMarkup.validate();
+        }
+    }
+
+    @Override
     public String toString() {
         return "SendSticker{" +
                 "chatId='" + chatId + '\'' +
@@ -187,70 +186,5 @@ public class SendSticker extends BotApiMethod<Message> {
                 ", replyMarkup=" + replyMarkup +
                 ", isNewSticker=" + isNewSticker +
                 '}';
-    }
-
-    @Override
-    public String getPath() {
-        return PATH;
-    }
-
-    @Override
-    public Message deserializeResponse(JSONObject answer) {
-        if (answer.getBoolean(Constants.RESPONSEFIELDOK)) {
-            return new Message(answer.getJSONObject(Constants.RESPONSEFIELDRESULT));
-        }
-        return null;
-    }
-
-    @Override
-    public void serialize(JsonGenerator gen, SerializerProvider serializerProvider) throws IOException {
-        gen.writeStartObject();
-        gen.writeStringField(METHOD_FIELD, PATH);
-        gen.writeStringField(CHATID_FIELD, chatId);
-        gen.writeStringField(STICKER_FIELD, sticker);
-
-        if (disableNotification != null) {
-            gen.writeBooleanField(DISABLENOTIFICATION_FIELD, disableNotification);
-        }
-        if (replyToMessageId != null) {
-            gen.writeNumberField(REPLYTOMESSAGEID_FIELD, replyToMessageId);
-        }
-        if (replyMarkup != null) {
-            gen.writeObjectField(REPLYMARKUP_FIELD, replyMarkup);
-        }
-
-        gen.writeEndObject();
-        gen.flush();
-    }
-
-    @Override
-    public void serializeWithType(JsonGenerator jsonGenerator, SerializerProvider serializerProvider, TypeSerializer typeSerializer) throws IOException {
-        serialize(jsonGenerator, serializerProvider);
-    }
-
-    @Override
-    public JSONObject toJson() {
-        JSONObject jsonObject = new JSONObject();
-        jsonObject.put(CHATID_FIELD, chatId);
-        jsonObject.put(STICKER_FIELD, sticker);
-
-        if (disableNotification != null) {
-            jsonObject.put(DISABLENOTIFICATION_FIELD, disableNotification);
-        }
-        if (replyToMessageId != null) {
-            jsonObject.put(REPLYTOMESSAGEID_FIELD, replyToMessageId);
-        }
-        if (replyMarkup != null) {
-            jsonObject.put(REPLYMARKUP_FIELD, replyMarkup.toJson());
-        }
-
-        return jsonObject;
-    }
-
-    @Override
-    public void validate() throws TelegramApiValidationException {
-        if (chatId == null) {
-            throw new TelegramApiValidationException("ChatId can't be null", this);
-        }
     }
 }
