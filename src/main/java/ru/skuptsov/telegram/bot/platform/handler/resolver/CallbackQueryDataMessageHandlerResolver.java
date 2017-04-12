@@ -19,11 +19,8 @@ import static java.util.Optional.ofNullable;
 public class CallbackQueryDataMessageHandlerResolver extends AbstractMessageContentMessageHandlerResolver {
 
     @Autowired(required = false)
-    public CallbackQueryDataMessageHandlerResolver(List<CallbackQueryDataMessageHandler> callbackQueryDataMessageHandlers) {
+    public void setCallbackQueryDataMessageHandlers(List<CallbackQueryDataMessageHandler> callbackQueryDataMessageHandlers) {
         callbackQueryDataMessageHandlers.stream().forEach(this::add);
-    }
-
-    public CallbackQueryDataMessageHandlerResolver() {
     }
 
     public void add(CallbackQueryDataMessageHandler callbackQueryDataMessageHandler) {

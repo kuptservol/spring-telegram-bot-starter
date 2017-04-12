@@ -31,4 +31,10 @@ public abstract class ApiMessageCommand<T extends BotApiMethod<Message>> extends
         return telegramBotApi.sendMessageAsync(message);
     }
 
+    @Override
+    public String toString() {
+        return "ApiMessageCommand{" +
+                "message=" + message +
+                '}';
+    }
 }

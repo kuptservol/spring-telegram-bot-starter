@@ -88,24 +88,19 @@ public class MappingRegistry implements ApplicationContextAware {
     private void registerNewCallbackQueryDataHandler(HandlerMethod handlerMethod, MessageMapping messageMapping) {
         metricsService.registerMessageProcessingMethod(handlerMethod);
         callbackQueryDataMessageHandlerResolver.add(
-                applicationContext.getBean(CallbackQueryDataMessageProxy.class,
-                        handlerMethod, copyOf(messageMapping.callback())));
+                new CallbackQueryDataMessageProxy(metricsService, handlerMethod, copyOf(messageMapping.callback())));
     }
 
     private void registerNewMessageTextMessageHandler(HandlerMethod handlerMethod, MessageMapping messageMapping) {
         metricsService.registerMessageProcessingMethod(handlerMethod);
         messageTextMessageHandlerResolver.add(
-                applicationContext.getBean(MessageTextMessageHandlerProxy.class,
-                        handlerMethod, copyOf(messageMapping.text()))
-        );
+                new MessageTextMessageHandlerProxy(handlerMethod, copyOf(messageMapping.text()), metricsService));
     }
 
     private void registerNewRegexpMessageTextHandler(HandlerMethod handlerMethod, MessageMapping messageMapping) {
         metricsService.registerMessageProcessingMethod(handlerMethod);
         regexpMessageTextHandlerResolver.add(
-                applicationContext.getBean(RegexpMessageTextHandlerProxy.class,
-                        handlerMethod, messageMapping.regexp())
-        );
+                new RegexpMessageTextHandlerProxy(handlerMethod, messageMapping.regexp(), metricsService));
     }
 
     private void checkParameters(HandlerMethod handlerMethod) {

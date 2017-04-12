@@ -19,6 +19,6 @@ import org.springframework.context.annotation.Import;
 })
 @EnableAutoConfiguration(exclude = {
         org.springframework.boot.autoconfigure.security.SecurityAutoConfiguration.class,})
-@ComponentScan(value = "ru.skuptsov.telegram.bot")
+@ComponentScan(value = "ru.skuptsov.telegram.bot.platform")
 public class BotPlatformConfiguration {
 }

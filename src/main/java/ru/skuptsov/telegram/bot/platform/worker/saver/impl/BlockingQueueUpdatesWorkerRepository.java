@@ -42,7 +42,9 @@ public class BlockingQueueUpdatesWorkerRepository implements UpdatesWorkerReposi
     public UpdateEvent get() {
         UpdateEvent updateEvent = updatesSaver.next().orElse(EMPTY);
 
-        log.trace("Returned event {}", updateEvent);
+        if (updateEvent != EMPTY) {
+            log.trace("Returned non empty event {}", updateEvent);
+        }
         return updateEvent;
     }
 

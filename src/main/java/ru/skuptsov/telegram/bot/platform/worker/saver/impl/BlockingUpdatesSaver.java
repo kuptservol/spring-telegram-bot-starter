@@ -45,7 +45,7 @@ public class BlockingUpdatesSaver implements UpdatesSaver {
     @Override
     public Optional<UpdateEvent> next() {
         try {
-            UpdateEvent poll = updatesQueue.poll(100, MILLISECONDS);
+            UpdateEvent poll = updatesQueue.poll(500, MILLISECONDS);
             return ofNullable(poll);
         } catch (InterruptedException e) {
             log.debug("Can't take message from queue", e);

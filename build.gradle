@@ -4,7 +4,7 @@ apply plugin: 'maven'
 
 buildscript {
     ext {
-        projectVersion = '1.1'
+        projectVersion = '1.2'
 
         bootVersion = '1.4.1.RELEASE'
         jacksonVersion = '2.8.4'

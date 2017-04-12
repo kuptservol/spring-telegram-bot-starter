@@ -23,11 +23,11 @@ public abstract class BaseMessageHandlerProxy implements MessageHandler {
 
     private final HandlerMethod handlerMethod;
 
-    @Autowired
-    private MetricsService metricsService;
+    private final MetricsService metricsService;
 
-    public BaseMessageHandlerProxy(HandlerMethod handlerMethod) {
+    public BaseMessageHandlerProxy(HandlerMethod handlerMethod, MetricsService metricsService) {
         this.handlerMethod = handlerMethod;
+        this.metricsService = metricsService;
     }
 
     @Override

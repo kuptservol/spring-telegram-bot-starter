@@ -18,7 +18,7 @@ import static ru.skuptsov.telegram.bot.platform.handler.UpdateFunctions.MESSAGE_
 public class MessageTextMessageHandlerResolver extends AbstractMessageContentMessageHandlerResolver {
 
     @Autowired(required = false)
-    public MessageTextMessageHandlerResolver(List<MessageTextMessageHandler> messageTextEventProcessors) {
+    public void setMessageTextMessageHandlerResolver(List<MessageTextMessageHandler> messageTextEventProcessors) {
         messageTextEventProcessors.stream().forEach(this::add);
     }
 
@@ -27,9 +27,6 @@ public class MessageTextMessageHandlerResolver extends AbstractMessageContentMes
         for (String data : commandTextList) {
             add(data, messageTextEventProcessors);
         }
-    }
-
-    public MessageTextMessageHandlerResolver() {
     }
 
     @Override
