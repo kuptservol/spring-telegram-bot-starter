@@ -5,41 +5,54 @@
 Library for fast java telegram bot development powered by spring-boot
 
 # Starting example
-- Import library from https://jitpack.io/#kuptservol/spring-telegram-bot-starter/v1.0
-- Create configuration file to hold telegram client token. The only needed at start in configuration is key "telegram.client.token".
-Create folder config, create file application.yml in it - add line 
+- Import library from [spring-telegram-bot-starter](https://jitpack.io/#kuptservol/spring-telegram-bot-starter/v1.3)
+- Create your first bot
+```
+@MessageHandler
+public class ExampleBotStarter {
+
+    public static void main(String[] args) {
+        BotPlatformStarter.start(ExampleBotStarter.class, "{set your client token received from https://telegram.me/botfather}");
+    }
+
+    @MessageMapping(text = "hi")
+    public MessageResponse sayGoodMorning(UpdateEvent updateEvent) {
+        return sendMessage("Good morning! Happy to see you!", updateEvent);
+    }
+}
+```
+
+- Start your bot. Service is now long pooling for new messages in chat and routes it to message handlers according your's @MessageHandler configurations.
+
+
+## Start options
+- Spring boot autoconfiguration is fully supported - so youn can start bot as SpringBoot App
+```
+@EnableAutoConfiguration
+@MessageHandler
+public class ExampleBotBootAutoConfiguration {
+
+    public static void main(String[] args) {
+        SpringApplication.run(ExampleBotBootAutoConfiguration.class, format("--%s=%s", TELEGRAM_CLIENT_TOKEN, "{token}"));
+    }
+
+    @MessageMapping(text = "hi")
+    public MessageResponse sayGoodMorning(UpdateEvent updateEvent) {
+        return sendMessage("Good morning! Happy to see you!", updateEvent);
+    }
+}
+```
+
+## Configuraiton options
+- You can create separate configuration file to hold telegram client token. The only needed at start configuration key is "telegram.client.token". Create folder config, create file application.yml in it - add line 
 ```
 telegram.client.token: {set your client token received from https://telegram.me/botfather}
 ```
 For more about spring boot external config options : 
-http://docs.spring.io/spring-boot/docs/current/reference/html/boot-features-external-config.html#boot-features-external-config-application-property-files.
-- Create your first bot as spring bean
-```
-package example.bot;
+[boot-features-external-config-application-property-files](http://docs.spring.io/spring-boot/docs/current/reference/html/boot-features-external-config.html#boot-features-external-config-application-property-files)
 
-@MessageHandler
-public class SimpleHelloBot {
+Full example codes you can find here [telegram-spring-bot-example](https://github.com/kuptservol/telegram-spring-bot-example)
 
-    @MessageMapping(text = "Hi")
-    public MessageResponse sayHi(UpdateEvent updateEvent) {
-        return sendMessage("Hi there!", updateEvent)
-                .setCallback((Consumer<Message>) message -> System.out.println("Message sent"));
-    }
-}
-```
-- Start your bot with configuration that knows about SimpleHelloBot bean
-```
-@Configuration
-@ComponentScan(value = "example.bot")
-public class ExampleBotStarter {
-    public static void main(String[] args) {
-        BotPlatformStarter.start(ExampleBotStarter.class, args);
-    }
-}
-```
-The service is now long pooling for new messages in chat and routes it to message handlers according your's @MessageHandler configurations.
-
-Full example code you can find here https://github.com/kuptservol/telegram-spring-bot-example
 # Message handling options
 ## Annotation based
 
@@ -68,7 +81,7 @@ In @MessageMapping you can handle messages to react on
 - message text regexp match
 - certain set of callback query data from users input
 
-Annotation based example could be found here https://github.com/kuptservol/telegram-spring-bot-example/blob/master/src/main/java/skuptsov/example/bot/impl/SimpleHelloBot.java
+Annotation based example could be found here [SimpleHelloBot](https://github.com/kuptservol/telegram-spring-bot-example/blob/master/src/main/java/skuptsov/example/bot/impl/SimpleHelloBot.java)
 
 ## Interface-type based
 
@@ -95,7 +108,7 @@ public class SimpleGoodbyeBot implements MessageTextMessageHandler {
 }
 ```
 
-Typed based example could be found here https://github.com/kuptservol/telegram-spring-bot-example/blob/master/src/main/java/skuptsov/example/bot/impl/SimpleGoodbyeBot.java
+Typed based example could be found here [SimpleGoodbyeBot](https://github.com/kuptservol/telegram-spring-bot-example/blob/master/src/main/java/skuptsov/example/bot/impl/SimpleGoodbyeBot.java)
 ## Use api directly
 
 In some situations you want to use api directly to get some additional information - you can inject **ru.skuptsov.telegram.bot.platform.client.TelegramBotApi** bean directly and call api methods.
@@ -115,7 +128,7 @@ public class SimpleCallApiBot {
     }
 }
 ```
-Direct api call example could be found here https://github.com/kuptservol/telegram-spring-bot-example/blob/master/src/main/java/skuptsov/example/bot/impl/SimpleCallApiBot.java
+Direct api call example could be found here [SimpleCallApiBot](https://github.com/kuptservol/telegram-spring-bot-example/blob/master/src/main/java/skuptsov/example/bot/impl/SimpleCallApiBot.java)
 
 # Extenalization points
 - Default message handler

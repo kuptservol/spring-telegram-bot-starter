@@ -16,7 +16,9 @@ import ru.skuptsov.telegram.bot.platform.client.impl.TelegramBotHttpClientImpl;
 @Configuration
 public class TelegramBotClientConfiguration {
 
-    @Value("${telegram.client.token}")
+    public static final String TELEGRAM_CLIENT_TOKEN = "telegram.client.token";
+
+    @Value("${" + TELEGRAM_CLIENT_TOKEN + "}")
     private String clientToken;
 
     @Value("${telegram.client.baseUrl:https://api.telegram.org}")

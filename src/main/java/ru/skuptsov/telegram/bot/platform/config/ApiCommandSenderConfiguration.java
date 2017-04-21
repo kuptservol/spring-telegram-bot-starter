@@ -46,8 +46,8 @@ public class ApiCommandSenderConfiguration {
     @Autowired
     private TelegramBotClientConfiguration telegramBotClientConfiguration;
 
-    @Bean(name = "commandSenderBotApi")
     @Primary
+    @Bean(name = "commandSenderBotApi")
     public TelegramBotApi telegramBotApi() {
         return new TelegramBotApiImpl(telegramBotClientConfiguration.createTelegramBotClient(getClient()));
     }

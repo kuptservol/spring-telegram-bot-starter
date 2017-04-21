@@ -1,7 +1,7 @@
 package ru.skuptsov.telegram.bot.platform.handler.resolver;
 
-import ru.skuptsov.telegram.bot.platform.model.UpdateEvent;
 import ru.skuptsov.telegram.bot.platform.handler.MessageHandler;
+import ru.skuptsov.telegram.bot.platform.model.UpdateEvent;
 
 import javax.validation.constraints.NotNull;
 

@@ -11,7 +11,6 @@ import org.telegram.telegrambots.exceptions.TelegramApiRequestException;
 import org.telegram.telegrambots.exceptions.TelegramApiValidationException;
 
 import java.io.IOException;
-import java.io.Serializable;
 import java.util.Objects;
 
 /**

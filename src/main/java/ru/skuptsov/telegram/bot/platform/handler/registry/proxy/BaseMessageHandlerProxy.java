@@ -2,7 +2,6 @@ package ru.skuptsov.telegram.bot.platform.handler.registry.proxy;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.ReflectionUtils;
 import ru.skuptsov.telegram.bot.platform.client.command.MessageResponse;
 import ru.skuptsov.telegram.bot.platform.client.exception.HandlerMethodInvocationException;

@@ -2,7 +2,6 @@ package ru.skuptsov.telegram.bot.platform.model.api.methods.send;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import org.telegram.telegrambots.api.methods.BotApiMethod;
-import org.telegram.telegrambots.api.methods.PartialBotApiMethod;
 import org.telegram.telegrambots.api.objects.Message;
 import org.telegram.telegrambots.api.objects.replykeyboard.ApiResponse;
 import org.telegram.telegrambots.api.objects.replykeyboard.ReplyKeyboard;

@@ -1,0 +1,2 @@
+org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
+ru.skuptsov.telegram.bot.platform.config.BotPlatformConfiguration
