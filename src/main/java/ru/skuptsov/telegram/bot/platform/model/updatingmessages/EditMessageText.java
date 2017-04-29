@@ -71,14 +71,14 @@ public class EditMessageText extends BotApiMethod<Message> {
         return chatId;
     }
 
-    public EditMessageText setChatId(String chatId) {
-        this.chatId = chatId;
-        return this;
-    }
-
     public EditMessageText setChatId(Long chatId) {
         Objects.requireNonNull(chatId);
         this.chatId = chatId.toString();
+        return this;
+    }
+
+    public EditMessageText setChatId(String chatId) {
+        this.chatId = chatId;
         return this;
     }
 
@@ -161,7 +161,8 @@ public class EditMessageText extends BotApiMethod<Message> {
     public Message deserializeResponse(String answer) throws TelegramApiRequestException {
         try {
             ApiResponse<Message> result = OBJECT_MAPPER.readValue(answer,
-                    new TypeReference<ApiResponse<Message>>(){});
+                    new TypeReference<ApiResponse<Message>>() {
+                    });
             if (result.getOk()) {
                 return result.getResult();
             } else {

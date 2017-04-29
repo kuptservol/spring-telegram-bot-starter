@@ -97,12 +97,12 @@ public class MessageHandlerBeanPostProcessor implements InitializingBean, Ordere
         return findAnnotation(beanType, MessageHandler.class) != null;
     }
 
+    private ApplicationContext getApplicationContext() {
+        return applicationContext;
+    }
+
     @Override
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
         this.applicationContext = applicationContext;
-    }
-
-    private ApplicationContext getApplicationContext() {
-        return applicationContext;
     }
 }

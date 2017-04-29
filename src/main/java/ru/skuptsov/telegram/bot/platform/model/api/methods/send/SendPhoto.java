@@ -57,14 +57,14 @@ public class SendPhoto extends BotApiMethod<Message> {
         return chatId;
     }
 
-    public SendPhoto setChatId(String chatId) {
-        this.chatId = chatId;
-        return this;
-    }
-
     public SendPhoto setChatId(Long chatId) {
         Objects.requireNonNull(chatId);
         this.chatId = chatId.toString();
+        return this;
+    }
+
+    public SendPhoto setChatId(String chatId) {
+        this.chatId = chatId;
         return this;
     }
 
@@ -109,6 +109,12 @@ public class SendPhoto extends BotApiMethod<Message> {
         return isNewPhoto;
     }
 
+    public SendPhoto setNewPhoto(File file) {
+        this.newPhotoFile = file;
+        this.isNewPhoto = true;
+        return this;
+    }
+
     public String getPhotoName() {
         return photoName;
     }
@@ -135,16 +141,10 @@ public class SendPhoto extends BotApiMethod<Message> {
         return this;
     }
 
-    public SendPhoto setNewPhoto(File file) {
-        this.newPhotoFile = file;
-        this.isNewPhoto = true;
-        return this;
-    }
-
     public SendPhoto setNewPhoto(String photoName, InputStream inputStream) {
-    	Objects.requireNonNull(photoName, "photoName cannot be null!");
-    	Objects.requireNonNull(inputStream, "inputStream cannot be null!");
-    	this.photoName = photoName;
+        Objects.requireNonNull(photoName, "photoName cannot be null!");
+        Objects.requireNonNull(inputStream, "inputStream cannot be null!");
+        this.photoName = photoName;
         this.newPhotoStream = inputStream;
         this.isNewPhoto = true;
         return this;
@@ -154,7 +154,8 @@ public class SendPhoto extends BotApiMethod<Message> {
     public Message deserializeResponse(String answer) throws TelegramApiRequestException {
         try {
             ApiResponse<Message> result = OBJECT_MAPPER.readValue(answer,
-                    new TypeReference<ApiResponse<Message>>(){});
+                    new TypeReference<ApiResponse<Message>>() {
+                    });
             if (result.getOk()) {
                 return result.getResult();
             } else {

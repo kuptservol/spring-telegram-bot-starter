@@ -19,7 +19,9 @@ import java.lang.reflect.Method;
  */
 public class HandlerMethod {
 
-    /** Logger that is available to subclasses */
+    /**
+     * Logger that is available to subclasses
+     */
     protected final Log logger = LogFactory.getLog(getClass());
 
     private final Object bean;
@@ -53,6 +55,7 @@ public class HandlerMethod {
 
     /**
      * Create an instance from a bean instance, method name, and parameter types.
+     *
      * @throws NoSuchMethodException when the method cannot be found
      */
     public HandlerMethod(Object bean, String methodName, Class<?>... parameterTypes) throws NoSuchMethodException {
@@ -196,6 +199,7 @@ public class HandlerMethod {
      * if no annotation can be found on the given method itself.
      * <p>Also supports <em>merged</em> composed annotations with attribute
      * overrides as of Spring Framework 4.2.2.
+     *
      * @param annotationType the type of annotation to introspect the method for.
      * @return the annotation, or {@code null} if none found
      * @see AnnotatedElementUtils#findMergedAnnotation

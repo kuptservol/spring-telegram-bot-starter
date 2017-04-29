@@ -90,7 +90,7 @@ public class MessageCallbackDataHandlerTest extends AbstractTestNGSpringContextT
         answer.setText(MESSAGE_ANSWER);
 
         verify(telegramBotApi)
-                .sendMessageAsync(argThat(new SendMessageObjectMatcher(answer)));
+                .sendMessage(argThat(new SendMessageObjectMatcher(answer)));
     }
 
     @Test
@@ -117,7 +117,7 @@ public class MessageCallbackDataHandlerTest extends AbstractTestNGSpringContextT
         callbackMessage.setText(MESSAGE_ANSWER);
 
         verify(telegramBotApi, never())
-                .sendMessageAsync(argThat(new SendMessageObjectMatcher(callbackMessage)));
+                .sendMessage(argThat(new SendMessageObjectMatcher(callbackMessage)));
     }
 
     private static class SendMessageObjectMatcher extends BaseTestMatcher<SendMessage> {

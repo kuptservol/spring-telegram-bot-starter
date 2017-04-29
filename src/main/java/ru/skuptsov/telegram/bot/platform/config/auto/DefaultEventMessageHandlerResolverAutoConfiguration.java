@@ -6,7 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import ru.skuptsov.telegram.bot.platform.client.command.MessageResponse;
+import ru.skuptsov.telegram.bot.platform.client.command.Reply;
 import ru.skuptsov.telegram.bot.platform.handler.DefaultMessageHandler;
 import ru.skuptsov.telegram.bot.platform.service.MetricsService;
 
@@ -27,7 +27,7 @@ public class DefaultEventMessageHandlerResolverAutoConfiguration {
         return updateEvent -> {
             log.info("No suitable processor found for event {}", updateEvent);
             metricsService.onNoMessageProcessorFound();
-            return MessageResponse.EMPTY;
+            return Reply.EMPTY;
         };
     }
 }

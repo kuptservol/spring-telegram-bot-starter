@@ -29,8 +29,8 @@ public class ExampleBotStarter {
     }
 
     @MessageMapping(text = "hi")
-    public MessageResponse sayGoodMorning(UpdateEvent updateEvent) {
-        return sendMessage("Good morning! Happy to see you!", updateEvent);
+    public Reply sayGoodMorning(UpdateEvent updateEvent) {
+        return Reply.withMessage("Good morning! Happy to see you!", updateEvent);
     }
 }
 ```
@@ -50,8 +50,8 @@ public class ExampleBotBootAutoConfiguration {
     }
 
     @MessageMapping(text = "hi")
-    public MessageResponse sayGoodMorning(UpdateEvent updateEvent) {
-        return sendMessage("Good morning! Happy to see you!", updateEvent);
+    public Reply sayGoodMorning(UpdateEvent updateEvent) {
+        return ReplyTo.to(updateEvent).withMessage("Good morning! Happy to see you!");
     }
 }
 ```
@@ -69,11 +69,11 @@ Full example codes you can find here [telegram-spring-bot-example](https://githu
 # Message handling options
 ## Annotation based
 
-In order to handle messages you need to mark bean as **@MessageHandler** - this will indicate to system to look for message mappings @MessageMapping. Message handler method, annotated as **@MessageMapping** should receive as method parameter **ru.skuptsov.telegram.bot.platform.model.UpdateEvent** and return **ru.skuptsov.telegram.bot.platform.client.command.MessageResponse**
+In order to handle messages you need to mark bean as **@MessageHandler** - this will indicate to system to look for message mappings @MessageMapping. Message handler method, annotated as **@MessageMapping** should receive as method parameter **ru.skuptsov.telegram.bot.platform.model.UpdateEvent** and return **ru.skuptsov.telegram.bot.platform.client.command.Reply**
 ```
 @MessageMapping(text = "Hi")
-    public MessageResponse sayHi(UpdateEvent updateEvent){
-        return sendMessage("Hi there!", updateEvent)
+    public Reply sayHi(UpdateEvent updateEvent){
+        return ReplyTo.to(updateEvent).withMessage("Hi there!");
         }
 ```
 
@@ -83,8 +83,8 @@ In order to handle messages you need to mark bean as **@MessageHandler** - this 
 But if you want to make some action after message was delivered - you can set some callback action.
 ```
 @MessageMapping(text = "Hi")
-    public MessageResponse sayHi(UpdateEvent updateEvent){
-        return sendMessage("Hi there!", updateEvent)
+    public Reply sayHi(UpdateEvent updateEvent){
+        return ReplyTo.to(updateEvent).withMessage("Hi there!")
                 .setCallback((Consumer<Message>) message -> System.out.println("Message sent"));
     }
 ```
@@ -115,8 +115,8 @@ public class SimpleGoodbyeBot implements MessageTextMessageHandler {
     }
 
     @Override
-    public MessageResponse handle(UpdateEvent updateEvent) {
-        return sendMessage("Goodbye! See you soon!", updateEvent);
+    public Reply handle(UpdateEvent updateEvent) {
+        return ReplyTo.to(updateEvent).withMessage("Goodbye! See you soon!");
     }
 }
 ```
@@ -134,10 +134,10 @@ public class SimpleCallApiBot {
     private TelegramBotApi telegramBotApi;
 
     @MessageMapping(text = "/me")
-    public MessageResponse getMe(UpdateEvent updateEvent) {
+    public Reply getMe(UpdateEvent updateEvent) {
         User me = telegramBotApi.getMe().get();
 
-        return sendMessage("Me is : " + me.getFirstName() + " " + me.getLastName(), updateEvent);
+        return ReplyTo.to(updateEvent).withMessage("Me is : " + me.getFirstName() + " " + me.getLastName());
     }
 }
 ```

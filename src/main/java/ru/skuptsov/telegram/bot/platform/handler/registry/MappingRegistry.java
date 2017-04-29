@@ -8,7 +8,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.core.MethodParameter;
 import org.springframework.stereotype.Component;
-import ru.skuptsov.telegram.bot.platform.client.command.MessageResponse;
+import ru.skuptsov.telegram.bot.platform.client.command.Reply;
 import ru.skuptsov.telegram.bot.platform.handler.annotation.MessageMapping;
 import ru.skuptsov.telegram.bot.platform.handler.registry.proxy.CallbackQueryDataMessageProxy;
 import ru.skuptsov.telegram.bot.platform.handler.registry.proxy.HandlerMethod;
@@ -114,8 +114,8 @@ public class MappingRegistry implements ApplicationContextAware {
 
         //todo: add void method
         MethodParameter returnType = handlerMethod.getReturnType();
-        checkArgument(MessageResponse.class.isAssignableFrom(returnType.getParameterType()),
-                "Declared method [" + handlerMethod + "] must return instance or subclass of MessageResponse.class");
+        checkArgument(Reply.class.isAssignableFrom(returnType.getParameterType()),
+                "Declared method [" + handlerMethod + "] must return instance or subclass of Reply.class");
     }
 
     private HandlerMethod createHandlerMethod(Object handler, Method method) {
@@ -130,12 +130,12 @@ public class MappingRegistry implements ApplicationContextAware {
         return handlerMethod;
     }
 
+    private ApplicationContext getApplicationContext() {
+        return applicationContext;
+    }
+
     @Override
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
         this.applicationContext = applicationContext;
-    }
-
-    private ApplicationContext getApplicationContext() {
-        return applicationContext;
     }
 }

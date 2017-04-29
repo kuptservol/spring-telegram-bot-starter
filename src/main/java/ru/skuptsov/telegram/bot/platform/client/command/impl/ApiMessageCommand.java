@@ -26,9 +26,13 @@ public abstract class ApiMessageCommand<T extends BotApiMethod<Message>> extends
         this.message = message;
     }
 
+    public T getMessage() {
+        return message;
+    }
+
     @Override
     public Future<Message> execute(@NotNull TelegramBotApi telegramBotApi) {
-        return telegramBotApi.sendMessageAsync(message);
+        return telegramBotApi.sendMessage(message).async();
     }
 
     @Override

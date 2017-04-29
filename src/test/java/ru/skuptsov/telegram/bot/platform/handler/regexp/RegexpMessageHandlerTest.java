@@ -87,7 +87,7 @@ public class RegexpMessageHandlerTest extends AbstractTestNGSpringContextTests {
         callbackMessage.setText(MESSAGE_ANSWER);
 
         verify(telegramBotApi)
-                .sendMessageAsync(argThat(new SendMessageObjectMatcher(callbackMessage)));
+                .sendMessage(argThat(new SendMessageObjectMatcher(callbackMessage)));
     }
 
     @Test
@@ -112,7 +112,7 @@ public class RegexpMessageHandlerTest extends AbstractTestNGSpringContextTests {
         callbackMessage.setText(MESSAGE_ANSWER);
 
         verify(telegramBotApi, never())
-                .sendMessageAsync(argThat(new SendMessageObjectMatcher(callbackMessage)));
+                .sendMessage(argThat(new SendMessageObjectMatcher(callbackMessage)));
     }
 
     private static class SendMessageObjectMatcher extends BaseTestMatcher<SendMessage> {

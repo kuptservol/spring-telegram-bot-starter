@@ -5,12 +5,12 @@ import org.telegram.telegrambots.api.methods.AnswerInlineQuery;
 import org.telegram.telegrambots.api.methods.BotApiMethod;
 import org.telegram.telegrambots.api.methods.GetUserProfilePhotos;
 import org.telegram.telegrambots.api.objects.*;
+import ru.skuptsov.telegram.bot.platform.client.command.Reply;
+import ru.skuptsov.telegram.bot.platform.client.impl.TelegramBotApiImpl;
 
 import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
-import java.util.concurrent.Future;
 
 /**
  * @author Sergey Kuptsov
@@ -20,29 +20,29 @@ public interface TelegramBotApi {
 
     List<Update> getNextUpdates(Integer poolingLimit, Integer poolingTimeout);
 
-    <R extends BotApiMethod<Message>> Future<Message> sendMessageAsync(@NotNull R command);
+    <T extends BotApiMethod<Message>> TelegramBotApiImpl.CommandExecutionWrapper<Message> sendMessage(@NotNull T message);
 
-    <T extends BotApiMethod<Message>> Optional<Message> sendMessageSync(@NotNull T message);
+    <T> TelegramBotApiImpl.CommandExecutionWrapper<T> reply(@NotNull Reply<T> reply);
 
-    Optional<User> getMe();
+    TelegramBotApiImpl.CommandExecutionWrapper<User> getMe();
 
-    Optional<File> getFile(@NotNull String file_id);
+    TelegramBotApiImpl.CommandExecutionWrapper<File> getFile(@NotNull String file_id);
 
-    Optional<UserProfilePhotos> getUserProfilePhotos(@NotNull GetUserProfilePhotos getUserProfilePhotos);
+    TelegramBotApiImpl.CommandExecutionWrapper<UserProfilePhotos> getUserProfilePhotos(@NotNull GetUserProfilePhotos getUserProfilePhotos);
 
-    Future<Boolean> answerInlineQuery(@NotNull AnswerInlineQuery answerInlineQuery);
+    TelegramBotApiImpl.CommandExecutionWrapper<Boolean> answerInlineQuery(@NotNull AnswerInlineQuery answerInlineQuery);
 
-    Future<Boolean> answerCallbackQuery(@NotNull AnswerCallbackQuery answerCallbackQuery);
+    TelegramBotApiImpl.CommandExecutionWrapper<Boolean> answerCallbackQuery(@NotNull AnswerCallbackQuery answerCallbackQuery);
 
-    Optional<Chat> getChat(@NotNull String chatId);
+    TelegramBotApiImpl.CommandExecutionWrapper<Chat> getChat(@NotNull String chatId);
 
-    Optional<ArrayList<ChatMember>> getChatAdministrators(@NotNull String chatId);
+    TelegramBotApiImpl.CommandExecutionWrapper<ArrayList<ChatMember>> getChatAdministrators(@NotNull String chatId);
 
-    Optional<Boolean> leaveChat(@NotNull String chatId);
+    TelegramBotApiImpl.CommandExecutionWrapper<Boolean> leaveChat(@NotNull String chatId);
 
-    Optional<Boolean> unbanChatMember(@NotNull String chatId, @NotNull Integer userId);
+    TelegramBotApiImpl.CommandExecutionWrapper<Boolean> unbanChatMember(@NotNull String chatId, @NotNull Integer userId);
 
-    Optional<Boolean> kickChatMember(@NotNull String chatId, @NotNull Integer userId);
+    TelegramBotApiImpl.CommandExecutionWrapper<Boolean> kickChatMember(@NotNull String chatId, @NotNull Integer userId);
 
-    Optional<Integer> getChatMemberCount(@NotNull String chatId);
+    TelegramBotApiImpl.CommandExecutionWrapper<Integer> getChatMemberCount(@NotNull String chatId);
 }

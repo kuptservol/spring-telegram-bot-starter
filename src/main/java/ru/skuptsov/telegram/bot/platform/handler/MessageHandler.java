@@ -1,6 +1,6 @@
 package ru.skuptsov.telegram.bot.platform.handler;
 
-import ru.skuptsov.telegram.bot.platform.client.command.MessageResponse;
+import ru.skuptsov.telegram.bot.platform.client.command.Reply;
 import ru.skuptsov.telegram.bot.platform.model.UpdateEvent;
 
 /**
@@ -8,7 +8,7 @@ import ru.skuptsov.telegram.bot.platform.model.UpdateEvent;
  * @since 22/05/2016
  */
 public interface MessageHandler {
-    MessageHandler EMPTY = (updateEvent) -> MessageResponse.EMPTY;
+    MessageHandler EMPTY = (updateEvent) -> Reply.EMPTY;
 
-    MessageResponse handle(UpdateEvent updateEvent);
+    Reply handle(UpdateEvent updateEvent);
 }

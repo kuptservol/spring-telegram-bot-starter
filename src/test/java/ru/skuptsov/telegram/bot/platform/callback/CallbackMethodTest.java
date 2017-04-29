@@ -35,6 +35,7 @@ import static org.mockito.Matchers.*;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static ru.skuptsov.telegram.bot.platform.CommonTestConfiguration.CHAT_ID;
+import static ru.skuptsov.telegram.bot.platform.client.impl.TelegramBotApiImpl.CommandExecutionWrapper.from;
 import static ru.skuptsov.telegram.bot.platform.handler.regexp.RegexpMessageHandler.MESSAGE_ANSWER;
 
 /**
@@ -95,8 +96,8 @@ public class CallbackMethodTest extends AbstractTestNGSpringContextTests {
         when(future.get()).thenReturn(returnMessage);
         when(future.get(anyLong(), any(TimeUnit.class))).thenReturn(returnMessage);
 
-        when(telegramBotApi.sendMessageAsync(argThat(new SendMessageObjectMatcher(sendMessage))))
-                .thenReturn(future);
+        when(telegramBotApi.sendMessage(argThat(new SendMessageObjectMatcher(sendMessage))))
+                .thenReturn(from(future));
 
         eventBus.post(UpdateEvents.builder()
                 .updateEventList(ImmutableList.of(updateEvent))

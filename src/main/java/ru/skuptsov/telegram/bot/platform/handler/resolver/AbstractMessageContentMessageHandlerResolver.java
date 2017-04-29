@@ -17,9 +17,8 @@ import static org.springframework.util.StringUtils.isEmpty;
  * @since 06/06/2016
  */
 public abstract class AbstractMessageContentMessageHandlerResolver extends AbstractMessageHandlerResolver {
-    private final Logger log = LoggerFactory.getLogger(AbstractMessageContentMessageHandlerResolver.class);
-
     protected final Map<Object, MessageHandler> messageContentProcessorMap = new HashMap<>();
+    private final Logger log = LoggerFactory.getLogger(AbstractMessageContentMessageHandlerResolver.class);
 
     public void add(@NotNull Object object, @NotNull MessageHandler messageHandler) {
         if (isEmpty(object)) {

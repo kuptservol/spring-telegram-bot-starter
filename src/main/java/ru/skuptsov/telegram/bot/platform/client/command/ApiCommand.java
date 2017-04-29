@@ -11,7 +11,7 @@ import java.util.function.Consumer;
  * @since 31/05/2016
  */
 public interface ApiCommand<T> {
-    ApiCommand EMPTY = telegramBotApi -> {
+    ApiCommand<Object> EMPTY = telegramBotApi -> {
         CompletableFuture<Object> future = new CompletableFuture<>();
         future.complete(new Object());
         return future;
@@ -26,9 +26,9 @@ public interface ApiCommand<T> {
         return EMPTY_CALLBACK;
     }
 
-    default void callback(Future<T> future) {
+    default void setCallback(Consumer<T> callback) {
     }
 
-    default void setCallback(Consumer<T> callback) {
+    default void callback(Future<T> future) {
     }
 }

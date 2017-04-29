@@ -57,14 +57,14 @@ public class SendDocument extends BotApiMethod<Message> {
         return chatId;
     }
 
-    public SendDocument setChatId(String chatId) {
-        this.chatId = chatId;
-        return this;
-    }
-
     public SendDocument setChatId(Long chatId) {
         Objects.requireNonNull(chatId);
         this.chatId = chatId.toString();
+        return this;
+    }
+
+    public SendDocument setChatId(String chatId) {
+        this.chatId = chatId;
         return this;
     }
 
@@ -84,6 +84,19 @@ public class SendDocument extends BotApiMethod<Message> {
         return this;
     }
 
+    public SendDocument setNewDocument(String documentName, InputStream inputStream) {
+        Objects.requireNonNull(documentName, "documentName cannot be null!");
+        Objects.requireNonNull(inputStream, "inputStream cannot be null!");
+        this.documentName = documentName;
+        this.isNewDocument = true;
+        this.newDocumentStream = inputStream;
+        return this;
+    }
+
+    public boolean isNewDocument() {
+        return isNewDocument;
+    }
+
     /**
      * Use this method to set the document to a new file
      *
@@ -94,19 +107,6 @@ public class SendDocument extends BotApiMethod<Message> {
         this.isNewDocument = true;
         this.newDocumentFile = file;
         return this;
-    }
-
-    public SendDocument setNewDocument(String documentName, InputStream inputStream) {
-    	Objects.requireNonNull(documentName, "documentName cannot be null!");
-    	Objects.requireNonNull(inputStream, "inputStream cannot be null!");
-    	this.documentName = documentName;
-        this.isNewDocument = true;
-        this.newDocumentStream = inputStream;
-        return this;
-    }
-
-    public boolean isNewDocument() {
-        return isNewDocument;
     }
 
     public String getDocumentName() {
@@ -166,7 +166,8 @@ public class SendDocument extends BotApiMethod<Message> {
     public Message deserializeResponse(String answer) throws TelegramApiRequestException {
         try {
             ApiResponse<Message> result = OBJECT_MAPPER.readValue(answer,
-                    new TypeReference<ApiResponse<Message>>(){});
+                    new TypeReference<ApiResponse<Message>>() {
+                    });
             if (result.getOk()) {
                 return result.getResult();
             } else {

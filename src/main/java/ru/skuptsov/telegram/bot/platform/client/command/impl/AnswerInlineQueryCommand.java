@@ -21,6 +21,6 @@ public class AnswerInlineQueryCommand extends AbstractApiCommand<Boolean> {
 
     @Override
     public Future<Boolean> execute(TelegramBotApi telegramBotApi) {
-        return telegramBotApi.answerInlineQuery(answerInlineQuery);
+        return telegramBotApi.answerInlineQuery(answerInlineQuery).async();
     }
 }

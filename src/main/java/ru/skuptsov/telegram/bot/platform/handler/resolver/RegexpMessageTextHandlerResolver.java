@@ -31,14 +31,14 @@ public class RegexpMessageTextHandlerResolver extends AbstractMessageHandlerReso
         regexpMessageTextHandlerList.forEach(this::add);
     }
 
+    public RegexpMessageTextHandlerResolver() {
+    }
+
     public void add(@NotNull RegexpMessageTextHandler regexpMessageTextHandler) {
         checkNotNull(regexpMessageTextHandler, "Handler cannot be null");
         int i = hashCounter++;
         regexpMessagePatterns.put(i, Pattern.compile(regexpMessageTextHandler.getMessageRegexp()));
         regexpMessageTextHandlers.put(i, regexpMessageTextHandler);
-    }
-
-    public RegexpMessageTextHandlerResolver() {
     }
 
     @Override
