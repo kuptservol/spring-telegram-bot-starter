@@ -1,6 +1,7 @@
 package ru.skuptsov.telegram.bot.platform.handler.message;
 
 import ru.skuptsov.telegram.bot.platform.client.command.Reply;
+import ru.skuptsov.telegram.bot.platform.client.command.ReplyTo;
 import ru.skuptsov.telegram.bot.platform.handler.annotation.MessageHandler;
 import ru.skuptsov.telegram.bot.platform.handler.annotation.MessageMapping;
 import ru.skuptsov.telegram.bot.platform.model.UpdateEvent;
@@ -13,6 +14,6 @@ public class MessageTextHandler {
 
     @MessageMapping(text = MESSAGE_TEXT)
     public Reply handle(UpdateEvent updateEvent) {
-        return Reply.withMessage(MESSAGE_ANSWER, updateEvent);
+        return ReplyTo.to(updateEvent).withMessage(MESSAGE_ANSWER);
     }
 }
