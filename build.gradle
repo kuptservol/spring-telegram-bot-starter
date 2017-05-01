@@ -1,6 +1,6 @@
 buildscript {
     ext {
-        projectVersion = '1.4'
+        projectVersion = '1.5'
 
         bootVersion = '1.5.3.RELEASE'
         jacksonVersion = '2.8.4'
@@ -21,13 +21,6 @@ plugins {
 
 install {
     repositories.mavenInstaller {
-        pom.project {
-            parent {
-                groupId 'org.springframework.boot'
-                artifactId 'spring-boot-starter-parent'
-                version '1.5.3.RELEASE'
-            }
-        }
         pom.version = "$projectVersion"
         pom.groupId = 'com.github.kuptservol'
         pom.artifactId = 'spring-telegram-bot-starter'
